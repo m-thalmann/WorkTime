@@ -1,0 +1,20 @@
+@use 'variables' as *;
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-family: 'Nunito', sans-serif;
+
+  background: $background;
+  color: $foreground;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
