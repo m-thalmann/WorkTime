@@ -13,4 +13,3 @@ import { RouterModule } from '@angular/router';
 export class LayoutComponent {
   constructor() {}
 }
-
