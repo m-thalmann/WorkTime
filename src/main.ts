@@ -10,4 +10,6 @@ if (environment.production) {
   enableProdMode();
 }
 
-bootstrapApplication(AppComponent, { providers: [provideRouter(AppRoutes)] }).catch((err) => console.error(err));
+bootstrapApplication(AppComponent, {
+  providers: [provideRouter(AppRoutes)],
+}).catch((err) => console.error(err));

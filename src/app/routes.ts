@@ -11,8 +11,8 @@ export const AppRoutes: Route[] = [
         path: 'dashboard',
         component: DashboardPageComponent,
       },
+
+      { path: '**', redirectTo: '/dashboard' },
     ],
   },
-
-  { path: '**', redirectTo: '/dashboard' },
 ];

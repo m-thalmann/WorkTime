@@ -1,1 +1,131 @@
-Dashboard works!
+<ng-container
+    *ngIf="{
+        week: currentWeekStart$ | async,
+        data: currentWeekData$ | async,
+        hoursPerDay: data.hoursPerDay$ | async
+    } as vm"
+>
+    <section class="summary"></section>
+
+    <div class="week-selector">
+        <button (click)="nextWeek(-1)" data-color="primary"><i class="fa-solid fa-arrow-left"></i></button>
+        <span
+            >Week <strong>{{ vm.week | date : 'ww, y' }}</strong></span
+        >
+        <button (click)="nextWeek(1)" data-color="primary"><i class="fa-solid fa-arrow-right"></i></button>
+        <button (click)="goToThisWeek()" data-color="primary"><i class="fa-solid fa-calendar-week"></i></button>
+    </div>
+
+    <div class="week">
+        <div
+            class="day"
+            [class.today]="isDayToday(day)"
+            [class.future]="isDayInFuture(day)"
+            *ngFor="let day of weekDays"
+        >
+            <p class="day-title">{{ getDayDateString(day) }}</p>
+            <div class="day-content">
+                <ng-container *ngIf="vm.data?.entries?.[day] as entry; else noEntry">
+                    <ng-container *ngIf="getWorkDay(entry) as workDay; else holiday">
+                        <div class="day-summary">
+                            <div class="total-day-work-time">
+                                <i class="fa-solid fa-clock"></i>
+                                {{ getWorkHours(entry) | hours }}
+                            </div>
+
+                            <ng-container *ngIf="{ data: getWorkHours(entry) - (vm.hoursPerDay || 0) } as dayDiff">
+                                <div class="day-work-time-diff" [class.reached]="dayDiff.data >= 0">
+                                    <i class="fa-solid fa-hourglass"></i>
+                                    {{ dayDiff.data | hours : true }}
+                                </div>
+                            </ng-container>
+                        </div>
+
+                        <div class="times">
+                            <div class="time-input">
+                                <input type="time" [value]="workDay.timeRange.startHours | hours" class="start-input" />
+                            </div>
+
+                            <div class="pauses">
+                                <div class="pause" *ngFor="let pause of workDay.pauses">
+                                    <div class="time-input">
+                                        <input
+                                            type="time"
+                                            [value]="pause.startHours | hours"
+                                            class="pause-start-input"
+                                        />
+                                    </div>
+                                    <div class="time-input">
+                                        <input type="time" [value]="pause.endHours | hours" class="pause-end-input" />
+                                    </div>
+
+                                    <button (click)="(null)" class="delete-pause-button" data-color="warn">
+                                        <i class="fa-solid fa-minus"></i>
+                                    </button>
+                                </div>
+
+                                <div class="pause new-pause" *ngIf="isAddingPause">
+                                    <div class="time-input">
+                                        <input type="time" class="pause-start-input" />
+                                    </div>
+                                    <div class="time-input">
+                                        <input type="time" class="pause-end-input" />
+                                    </div>
+
+                                    <button (click)="(null)" class="accept-add-pause-button" data-color="primary">
+                                        <i class="fa-solid fa-check"></i>
+                                    </button>
+                                    <button
+                                        (click)="isAddingPause = false"
+                                        class="decline-add-pause-button"
+                                        data-color="warn"
+                                    >
+                                        <i class="fa-solid fa-xmark"></i>
+                                    </button>
+                                </div>
+
+                                <button (click)="isAddingPause = true" [disabled]="isAddingPause" data-color="primary">
+                                    <i class="fa-solid fa-plus"></i> Pause
+                                </button>
+                            </div>
+
+                            <div class="time-input">
+                                <input type="time" [value]="workDay.timeRange.endHours | hours" class="end-input" />
+                            </div>
+                        </div>
+
+                        <button (click)="(null)">
+                            <i class="fa-solid fa-calendar-xmark"></i>
+                            Clear entry
+                        </button>
+                    </ng-container>
+
+                    <ng-template #holiday>
+                        <p class="holiday">
+                            <i class="fa-solid fa-calendar-minus"></i>
+                            <span>Holiday /<br />No work</span>
+                        </p>
+                    </ng-template>
+                </ng-container>
+
+                <ng-template #noEntry>
+                    <div class="no-entry">
+                        <ng-container *ngIf="!isDayInFuture(day); else futureEntry">
+                            <button (click)="(null)" data-color="primary">
+                                <i class="fa-solid fa-calendar-plus"></i> Add entry
+                            </button>
+                            <button (click)="(null)">
+                                <i class="fa-solid fa-calendar-minus"></i> Add holiday entry
+                            </button>
+                        </ng-container>
+
+                        <ng-template #futureEntry>
+                            <i class="fa-solid fa-wand-magic-sparkles fg-accent"></i>
+                            <span>This date is in the future...</span>
+                        </ng-template>
+                    </div>
+                </ng-template>
+            </div>
+        </div>
+    </div>
+</ng-container>
