@@ -1,14 +1,20 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { tap } from 'rxjs';
-import { BehaviorSubject, combineLatest, map, Observable } from 'rxjs';
-import { getStartOfWeek } from 'src/app/core/helpers';
+import { Store } from '@ngrx/store';
+import { BehaviorSubject, combineLatest, map, Observable, tap } from 'rxjs';
+import DateHelpers from 'src/app/core/helpers/DateHelpers';
 import { DayOfWeek, DaysOfWeek } from 'src/app/core/models/day-of-week.model';
 import { WeekIdentifierHelper } from 'src/app/core/models/week-identifier.model';
-import { isWorkDayEntry, WorkEntry, WorkEntryHelper } from 'src/app/core/models/work-entry.model';
+import { HolidayEntry, isWorkDayEntry, WorkEntry, WorkEntryHelper } from 'src/app/core/models/work-entry.model';
 import { WorkWeek } from 'src/app/core/models/work-week.model';
 import { HoursPipe } from 'src/app/core/pipes/hours.pipe';
-import { DataService } from 'src/app/core/services/data.service';
+import { DataActions } from 'src/app/core/state/data/data.actions';
+import {
+  selectHoursPerDay,
+  selectTotalWorkHoursDiff,
+  selectWorkStartDate,
+  selectWorkWeeks,
+} from 'src/app/core/state/data/data.selectors';
 
 @Component({
   selector: 'app-dashboard-page',
@@ -21,9 +27,16 @@ import { DataService } from 'src/app/core/services/data.service';
 export class DashboardPageComponent {
   isAddingPause = false;
 
-  currentWeekStart$ = new BehaviorSubject(getStartOfWeek(new Date()));
+  hoursPerDay$ = this.store.select(selectHoursPerDay);
+  workStartDate$ = this.store.select(selectWorkStartDate);
+  totalWorkHoursDiff$ = this.store.select(selectTotalWorkHoursDiff);
 
-  currentWeekData$: Observable<WorkWeek> = combineLatest([this.currentWeekStart$, this.data.workWeeks$]).pipe(
+  currentWeekStart$ = new BehaviorSubject(DateHelpers.getStartOfWeek(new Date()));
+
+  currentWeekData$: Observable<WorkWeek> = combineLatest([
+    this.currentWeekStart$,
+    this.store.select(selectWorkWeeks),
+  ]).pipe(
     tap(() => (this.isAddingPause = false)),
     map(([weekStartDate, weekData]) => {
       let week = WeekIdentifierHelper.fromDate(weekStartDate);
@@ -41,7 +54,7 @@ export class DashboardPageComponent {
     })
   );
 
-  constructor(public data: DataService) {}
+  constructor(private store: Store) {}
 
   get weekDays() {
     return DaysOfWeek;
@@ -59,37 +72,23 @@ export class DashboardPageComponent {
     let nextDate = new Date(this.currentWeekStart$.value);
     nextDate.setDate(nextDate.getDate() + 7 * amount);
 
-    this.currentWeekStart$.next(getStartOfWeek(nextDate));
+    this.currentWeekStart$.next(DateHelpers.getStartOfWeek(nextDate));
   }
 
   goToThisWeek() {
-    this.currentWeekStart$.next(getStartOfWeek(new Date()));
+    this.currentWeekStart$.next(DateHelpers.getStartOfWeek(new Date()));
   }
 
   getDayDateString(day: DayOfWeek) {
-    let date = this.getDateFromDay(day);
-
-    let dayName = day.substring(0, 1).toUpperCase() + day.substring(1, 3);
-    let year = date.getFullYear();
-    let month = (date.getMonth() + 1).toString().padStart(2, '0');
-    let dateDay = date.getDate().toString().padStart(2, '0');
-
-    return `${dayName}, ${dateDay}.${month}.${year}`;
+    return DateHelpers.getDayDateString(this.getDateFromDay(day));
   }
 
   isDayToday(day: DayOfWeek) {
-    let date = this.getDateFromDay(day);
-
-    return date.toDateString() === new Date().toDateString();
+    return DateHelpers.isToday(this.getDateFromDay(day));
   }
 
   isDayInFuture(day: DayOfWeek) {
-    let date = this.getDateFromDay(day);
-
-    let today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    return today < date;
+    return DateHelpers.isInFuture(this.getDateFromDay(day));
   }
 
   getDayData(data: WorkWeek, day: DayOfWeek) {
@@ -98,6 +97,22 @@ export class DashboardPageComponent {
 
   getWorkHours(entry: WorkEntry) {
     return WorkEntryHelper.getWorkHours(entry);
+  }
+
+  addHolidayEntry(day: DayOfWeek) {
+    let week = WeekIdentifierHelper.fromDate(this.currentWeekStart$.value);
+
+    this.store.dispatch(DataActions.setWorkEntry({ week: week, dayOfWeek: day, entry: {} as HolidayEntry }));
+  }
+
+  removeWorkEntry(day: DayOfWeek) {
+    let week = WeekIdentifierHelper.fromDate(this.currentWeekStart$.value);
+
+    this.store.dispatch(DataActions.removeWorkEntry({ week: week, dayOfWeek: day }));
+  }
+
+  setWorkStartDate(date: string) {
+    this.store.dispatch(DataActions.setWorkStartDate({ date }));
   }
 
   private getDateFromDay(day: DayOfWeek) {

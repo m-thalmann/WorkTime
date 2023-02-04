@@ -2,11 +2,11 @@
     *ngIf="{
         week: currentWeekStart$ | async,
         data: currentWeekData$ | async,
-        hoursPerDay: data.hoursPerDay$ | async
+        hoursPerDay: hoursPerDay$ | async,
+        workStartDate: workStartDate$ | async,
+        totalWorkHoursDiff: totalWorkHoursDiff$ | async
     } as vm"
 >
-    <section class="summary"></section>
-
     <div class="week-selector">
         <button (click)="nextWeek(-1)" data-color="primary"><i class="fa-solid fa-arrow-left"></i></button>
         <span
@@ -93,11 +93,6 @@
                                 <input type="time" [value]="workDay.timeRange.endHours | hours" class="end-input" />
                             </div>
                         </div>
-
-                        <button (click)="(null)">
-                            <i class="fa-solid fa-calendar-xmark"></i>
-                            Clear entry
-                        </button>
                     </ng-container>
 
                     <ng-template #holiday>
@@ -106,6 +101,11 @@
                             <span>Holiday /<br />No work</span>
                         </p>
                     </ng-template>
+
+                    <button (click)="removeWorkEntry(day)">
+                        <i class="fa-solid fa-calendar-xmark"></i>
+                        Clear entry
+                    </button>
                 </ng-container>
 
                 <ng-template #noEntry>
@@ -114,7 +114,7 @@
                             <button (click)="(null)" data-color="primary">
                                 <i class="fa-solid fa-calendar-plus"></i> Add entry
                             </button>
-                            <button (click)="(null)">
+                            <button (click)="addHolidayEntry(day)">
                                 <i class="fa-solid fa-calendar-minus"></i> Add holiday entry
                             </button>
                         </ng-container>
@@ -128,4 +128,28 @@
             </div>
         </div>
     </div>
+
+    <section class="summary">
+        <h2>Summary</h2>
+
+        <div class="total-work-diff">
+            <span>Total work hours diff</span>
+            <span [class.reached]="(vm.totalWorkHoursDiff || 0) >= 0">{{ vm.totalWorkHoursDiff | hours : true }}</span>
+        </div>
+
+        <label>
+            Work hours per day
+            <input type="time" [value]="vm.hoursPerDay | hours" />
+        </label>
+
+        <label>
+            Work start date
+            <input
+                type="date"
+                [value]="vm.workStartDate"
+                (change)="setWorkStartDate(workStartDateInput.value)"
+                #workStartDateInput
+            />
+        </label>
+    </section>
 </ng-container>

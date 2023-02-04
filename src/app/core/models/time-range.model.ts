@@ -15,7 +15,7 @@ export class TimeRangeHelper {
   }
 
   static getTimeString(totalHours: number) {
-    let sign = totalHours > 0 ? '' : '-';
+    let sign = totalHours >= 0 ? '' : '-';
     let absHours = Math.abs(totalHours);
     let hours = Math.floor(absHours);
     let minutes = Math.round((absHours - hours) * 60 * 1000) / 1000;

@@ -1,7 +1,88 @@
 @use 'variables' as *;
 
+$day-background: darken($foreground, 75%);
+
 :host {
   display: block;
+}
+
+input[type='time'],
+input[type='date'] {
+  text-align: center;
+
+  background: rgba(0, 0, 0, 0.2);
+  color: inherit;
+  border: none;
+  font-family: inherit;
+
+  padding: 0.25em;
+  border-radius: 1em;
+
+  transition: background 0.2s;
+  cursor: text;
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.5);
+  }
+}
+
+input[type='time'] {
+  width: 8em;
+}
+
+.summary {
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
+  align-items: center;
+
+  width: fit-content;
+  margin: 0 auto;
+  margin-top: 3em;
+  padding: 1em 4em;
+
+  background: $day-background;
+  border-radius: 0.25em;
+
+  box-shadow: 0 0 0.5em 0.25em rgba(0, 0, 0, 0.1);
+
+  h2 {
+    margin: 0;
+  }
+
+  label,
+  .total-work-diff span:first-of-type {
+    text-align: center;
+    color: rgba($foreground, 0.5);
+    font-weight: lighter;
+  }
+
+  label input {
+    color: $foreground;
+
+    display: block;
+    margin: 0 auto;
+    margin-top: 0.5em;
+  }
+
+  .total-work-diff span:last-of-type {
+    display: block;
+    width: fit-content;
+    margin: 0 auto;
+    margin-top: 0.5em;
+
+    padding: 0.5em 0.75em;
+    border-radius: 0.5em;
+
+    background: #d66e05;
+    color: white;
+
+    font-size: 0.9em;
+
+    &.reached {
+      background: green;
+    }
+  }
 }
 
 .week-selector {
@@ -26,7 +107,7 @@
   .day {
     display: flex;
     flex-direction: column;
-    background: darken($foreground, 75%);
+    background: $day-background;
 
     box-shadow: 0 0 0.5em 0.25em rgba(0, 0, 0, 0.1);
 
@@ -130,26 +211,6 @@
             top: 50%;
             transform: translateY(-50%);
           }
-
-          input {
-            width: 8em;
-            text-align: center;
-
-            background: rgba(0, 0, 0, 0.2);
-            color: inherit;
-            border: none;
-            font-family: inherit;
-
-            padding: 0.25em;
-            border-radius: 1em;
-
-            transition: background 0.2s;
-            cursor: text;
-
-            &:hover {
-              background: rgba(0, 0, 0, 0.5);
-            }
-          }
         }
 
         .pauses {
@@ -207,10 +268,11 @@
         justify-content: center;
         gap: 1em;
         margin: 0;
-        padding-bottom: 1.5em;
       }
 
       .holiday {
+        margin-bottom: -2em;
+
         i {
           color: $accent;
           font-size: 2em;
@@ -223,6 +285,8 @@
       }
 
       .no-entry {
+        padding-bottom: 1.5em;
+
         span {
           text-align: center;
           opacity: 0.5;
