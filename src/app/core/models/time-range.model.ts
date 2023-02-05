@@ -8,7 +8,7 @@ export class TimeRangeHelper {
     return { startHours: this.getHoursFromString(start), endHours: this.getHoursFromString(end) };
   }
 
-  private static getHoursFromString(hourString: string) {
+  static getHoursFromString(hourString: string) {
     let [hours, minutes] = hourString.split(':').map((v: string) => parseInt(v));
 
     return hours + Math.round((minutes / 60) * 1000) / 1000;

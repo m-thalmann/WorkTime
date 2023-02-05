@@ -1,15 +1,15 @@
-import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { DayOfWeek, DaysOfWeek } from 'src/app/core/models/day-of-week.model';
-import { HolidayEntry, isWorkDayEntry, WorkEntry, WorkEntryHelper } from 'src/app/core/models/work-entry.model';
-import DateHelpers from 'src/app/core/helpers/DateHelpers';
-import { WeekIdentifierHelper } from 'src/app/core/models/week-identifier.model';
-import { DataActions } from 'src/app/core/state/data/data.actions';
+import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { Store } from '@ngrx/store';
+import DateHelpers from 'src/app/core/helpers/DateHelpers';
+import { DayOfWeek, DaysOfWeek } from 'src/app/core/models/day-of-week.model';
+import { WeekIdentifierHelper } from 'src/app/core/models/week-identifier.model';
+import { HolidayEntry, isWorkDayEntry, WorkEntry, WorkEntryHelper } from 'src/app/core/models/work-entry.model';
 import { HoursPipe } from 'src/app/core/pipes/hours.pipe';
+import { DataActions } from 'src/app/core/state/data/data.actions';
 import { selectHoursPerDay } from 'src/app/core/state/data/data.selectors';
-import { TimeRangeHelper } from 'src/app/core/models/time-range.model';
 import { WeekDayCardPausesComponent } from './components/week-day-card-pauses/week-day-card-pauses.component';
+import { WeekDayCardTimeInputWrapperComponent } from './components/week-day-card-time-input-wrapper/week-day-card-time-input-wrapper.component';
 
 @Component({
   selector: 'app-week-day-card',
@@ -17,7 +17,7 @@ import { WeekDayCardPausesComponent } from './components/week-day-card-pauses/we
   templateUrl: './week-day-card.component.html',
   styleUrls: ['./week-day-card.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, HoursPipe, WeekDayCardPausesComponent],
+  imports: [CommonModule, HoursPipe, WeekDayCardPausesComponent, WeekDayCardTimeInputWrapperComponent],
 })
 export class WeekDayCardComponent {
   @Input() weekStart!: Date;

@@ -19,9 +19,9 @@
                     </div>
 
                     <div class="times">
-                        <div class="time-input">
+                        <app-week-day-card-time-input-wrapper>
                             <input type="time" [value]="workDay.timeRange.startHours | hours" class="start-input" />
-                        </div>
+                        </app-week-day-card-time-input-wrapper>
 
                         <app-week-day-card-pauses
                             [weekStart]="weekStart"
@@ -29,9 +29,9 @@
                             [workDayEntry]="workDay"
                         ></app-week-day-card-pauses>
 
-                        <div class="time-input">
+                        <app-week-day-card-time-input-wrapper>
                             <input type="time" [value]="workDay.timeRange.endHours | hours" class="end-input" />
-                        </div>
+                        </app-week-day-card-time-input-wrapper>
                     </div>
                 </ng-container>
 

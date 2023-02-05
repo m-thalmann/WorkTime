@@ -1,32 +1,22 @@
 <div class="container">
-    <div class="pause" *ngFor="let pause of workDayEntry.pauses; let index = index">
-        <div class="time-input">
-            <input type="time" [value]="pause.startHours | hours" class="pause-start-input" />
-        </div>
-        <div class="time-input">
-            <input type="time" [value]="pause.endHours | hours" class="pause-end-input" />
-        </div>
+    <app-week-day-card-pause
+        [pause]="pause"
+        [pauseIndex]="index"
+        [weekStart]="weekStart"
+        [weekDay]="weekDay"
+        [workDayEntry]="workDayEntry"
+        *ngFor="let pause of workDayEntry.pauses; let index = index"
+    ></app-week-day-card-pause>
 
-        <button (click)="removePauseEntry(index)" class="delete-pause-button" data-color="warn">
-            <i class="fa-solid fa-minus"></i>
-        </button>
-    </div>
-
-    <div class="pause new-pause" *ngIf="isAddingPause">
-        <div class="time-input">
-            <input type="time" class="pause-start-input" [(ngModel)]="newPauseStart" />
-        </div>
-        <div class="time-input">
-            <input type="time" class="pause-end-input" [(ngModel)]="newPauseEnd" />
-        </div>
-
-        <button (click)="addPauseEntry()" class="accept-add-pause-button" data-color="primary">
-            <i class="fa-solid fa-check"></i>
-        </button>
-        <button (click)="isAddingPause = false" class="decline-add-pause-button" data-color="warn">
-            <i class="fa-solid fa-xmark"></i>
-        </button>
-    </div>
+    <app-week-day-card-pause
+        [pause]="null"
+        [pauseIndex]="null"
+        [weekStart]="weekStart"
+        [weekDay]="weekDay"
+        [workDayEntry]="workDayEntry"
+        (finishAddPause)="isAddingPause = false"
+        *ngIf="isAddingPause"
+    ></app-week-day-card-pause>
 
     <button (click)="isAddingPause = true" [disabled]="isAddingPause" data-color="primary">
         <i class="fa-solid fa-plus"></i> Pause

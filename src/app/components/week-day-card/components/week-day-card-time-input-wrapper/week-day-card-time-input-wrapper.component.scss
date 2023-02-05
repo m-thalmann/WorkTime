@@ -1,0 +1,21 @@
+@use 'variables' as *;
+
+:host {
+  display: block;
+  position: relative;
+
+  &::before {
+    display: block;
+    content: '';
+    width: 1.5em;
+    height: 1.5em;
+    background: darken($foreground, 10%);
+    border-radius: 50%;
+
+    position: absolute;
+    left: -2em;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+}
+
