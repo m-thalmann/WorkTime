@@ -1,0 +1,83 @@
+@use 'variables' as *;
+@use 'element-mixins';
+
+:host {
+  display: block;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5em;
+
+  input[type='time'],
+  input[type='date'] {
+    @include element-mixins.dateOrTimeInput();
+    width: 100%;
+  }
+
+  .pause {
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
+    position: relative;
+
+    &::before {
+      display: block;
+      content: '';
+      width: 1em;
+      height: calc(100% - 1.25em);
+      border-radius: 1em;
+
+      position: absolute;
+      top: 0.5em;
+      left: -1.75em;
+
+      background: darken($foreground, 35%);
+    }
+
+    .time-input {
+      position: relative;
+
+      &::before {
+        display: block;
+        content: '';
+        width: 1.5em;
+        height: 1.5em;
+        background: darken($foreground, 10%);
+        border-radius: 50%;
+
+        position: absolute;
+        left: -2em;
+        top: 50%;
+        transform: translateY(-50%);
+      }
+    }
+
+    > button {
+      border-radius: 50%;
+      width: 1.5rem;
+      height: 1.5rem;
+      font-size: 1em;
+      padding: 0;
+
+      position: absolute;
+      top: 50%;
+      right: -2em;
+      transform: translateY(-50%);
+
+      &.accept-add-pause-button {
+        top: calc(50% - 1em);
+      }
+
+      &.decline-add-pause-button {
+        top: calc(50% + 1em);
+      }
+    }
+  }
+
+  > button {
+    padding: 0.25em 0.5em;
+  }
+}
+

@@ -1,0 +1,18 @@
+@mixin dateOrTimeInput() {
+  text-align: center;
+
+  background: rgba(0, 0, 0, 0.2);
+  color: inherit;
+  border: none;
+  font-family: inherit;
+
+  padding: 0.25em;
+  border-radius: 1em;
+
+  transition: background 0.2s;
+  cursor: text;
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.5);
+  }
+}

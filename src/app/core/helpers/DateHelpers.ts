@@ -22,8 +22,12 @@ class DateHelpers {
     const startDateDay = (startDate.getDay() || 7) - 1;
     const endDateDay = (endDate.getDay() || 7) - 1;
 
-    const firstWeekDays = Math.max(0, 7 - 2 - startDateDay);
-    const lastWeekDays = Math.max(0, Math.min(5, 1 + endDateDay));
+    let firstWeekDays = Math.max(0, 7 - 2 - startDateDay);
+    let lastWeekDays = 0;
+
+    if (DateHelpers.getStartOfWeek(startDate).getTime() !== DateHelpers.getStartOfWeek(endDate).getTime()) {
+      lastWeekDays = Math.max(0, Math.min(5, 1 + endDateDay));
+    }
 
     const totalDayDiff = DateHelpers.getTotalDays(startDate, endDate);
 

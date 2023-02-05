@@ -1,0 +1,155 @@
+@use 'variables' as *;
+@use 'element-mixins';
+
+:host {
+  display: block;
+}
+
+.day {
+  display: flex;
+  flex-direction: column;
+  background: $day-background;
+
+  box-shadow: 0 0 0.5em 0.25em rgba(0, 0, 0, 0.1);
+
+  input[type='time'],
+  input[type='date'] {
+    @include element-mixins.dateOrTimeInput();
+  }
+
+  &.today {
+    background: red;
+  }
+
+  &,
+  .day-title {
+    border-radius: 0.25em;
+  }
+
+  .day-title {
+    font-weight: bold;
+    margin: 0;
+
+    background: darken($foreground, 80%);
+
+    padding: 0.75em 1em;
+    text-align: center;
+  }
+
+  .day-content {
+    flex: 1;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2em;
+
+    padding: 1em 1em 2em 1em;
+
+    .day-summary {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5em;
+
+      .total-day-work-time,
+      .day-work-time-diff {
+        text-align: center;
+        padding: 0.25em 1em;
+        border-radius: 0.5em;
+      }
+
+      .total-day-work-time {
+        background: $primary;
+        color: $primary-text;
+      }
+
+      .day-work-time-diff {
+        background: #d66e05;
+        color: white;
+
+        font-size: 0.75em;
+
+        &.reached {
+          background: green;
+        }
+      }
+    }
+
+    .times {
+      position: relative;
+      padding: 0 2em;
+
+      display: flex;
+      flex-direction: column;
+      gap: 2em;
+
+      &::before {
+        display: block;
+        content: '';
+        width: 1em;
+        height: calc(100% - 1.25em);
+        border-radius: 1em;
+
+        position: absolute;
+        top: 0.5em;
+        left: 0.25em;
+
+        background: $accent;
+      }
+
+      .time-input {
+        position: relative;
+
+        &::before {
+          display: block;
+          content: '';
+          width: 1.5em;
+          height: 1.5em;
+          background: darken($foreground, 10%);
+          border-radius: 50%;
+
+          position: absolute;
+          left: -2em;
+          top: 50%;
+          transform: translateY(-50%);
+        }
+      }
+    }
+
+    .holiday,
+    .no-entry {
+      flex: 1;
+
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1em;
+      margin: 0;
+    }
+
+    .holiday {
+      margin-bottom: -2em;
+
+      i {
+        color: $accent;
+        font-size: 2em;
+      }
+
+      span {
+        font-size: 1.5em;
+        line-height: 1.5;
+      }
+    }
+
+    .no-entry {
+      padding-bottom: 1.5em;
+
+      span {
+        text-align: center;
+        opacity: 0.5;
+      }
+    }
+  }
+}
+

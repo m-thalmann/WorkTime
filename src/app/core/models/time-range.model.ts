@@ -18,7 +18,7 @@ export class TimeRangeHelper {
     let sign = totalHours >= 0 ? '' : '-';
     let absHours = Math.abs(totalHours);
     let hours = Math.floor(absHours);
-    let minutes = Math.round((absHours - hours) * 60 * 1000) / 1000;
+    let minutes = Math.round((absHours - hours) * 60);
 
     return sign + hours.toString().padStart(2, '0') + ':' + minutes.toString().padStart(2, '0');
   }

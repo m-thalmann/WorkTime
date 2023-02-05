@@ -1,0 +1,71 @@
+<ng-container *ngIf="{ hoursPerDay: hoursPerDay$ | async } as vm">
+    <div class="day" [class.today]="isDayToday" [class.future]="isDayInFuture">
+        <p class="day-title">{{ dayDateString }}</p>
+        <div class="day-content">
+            <ng-container *ngIf="workEntry; else noEntry">
+                <ng-container *ngIf="workDay; else holiday">
+                    <div class="day-summary">
+                        <div class="total-day-work-time">
+                            <i class="fa-solid fa-clock"></i>
+                            {{ workHours | hours }}
+                        </div>
+
+                        <ng-container *ngIf="{ data: workHours - (vm.hoursPerDay || 0) } as dayDiff">
+                            <div class="day-work-time-diff" [class.reached]="dayDiff.data >= 0">
+                                <i class="fa-solid fa-hourglass"></i>
+                                {{ dayDiff.data | hours : true }}
+                            </div>
+                        </ng-container>
+                    </div>
+
+                    <div class="times">
+                        <div class="time-input">
+                            <input type="time" [value]="workDay.timeRange.startHours | hours" class="start-input" />
+                        </div>
+
+                        <app-week-day-card-pauses
+                            [weekStart]="weekStart"
+                            [weekDay]="weekDay"
+                            [workDayEntry]="workDay"
+                        ></app-week-day-card-pauses>
+
+                        <div class="time-input">
+                            <input type="time" [value]="workDay.timeRange.endHours | hours" class="end-input" />
+                        </div>
+                    </div>
+                </ng-container>
+
+                <ng-template #holiday>
+                    <p class="holiday">
+                        <i class="fa-solid fa-calendar-minus"></i>
+                        <span>Holiday /<br />No work</span>
+                    </p>
+                </ng-template>
+
+                <button (click)="removeWorkEntry()">
+                    <i class="fa-solid fa-calendar-xmark"></i>
+                    Clear entry
+                </button>
+            </ng-container>
+
+            <ng-template #noEntry>
+                <div class="no-entry">
+                    <ng-container *ngIf="!isDayInFuture; else futureEntry">
+                        <button (click)="addWorkDayEntry()" data-color="primary">
+                            <i class="fa-solid fa-calendar-plus"></i> Add entry
+                        </button>
+                        <button (click)="addHolidayEntry()">
+                            <i class="fa-solid fa-calendar-minus"></i> Add holiday entry
+                        </button>
+                    </ng-container>
+
+                    <ng-template #futureEntry>
+                        <i class="fa-solid fa-wand-magic-sparkles fg-accent"></i>
+                        <span>This date is in the future...</span>
+                    </ng-template>
+                </div>
+            </ng-template>
+        </div>
+    </div>
+</ng-container>
+

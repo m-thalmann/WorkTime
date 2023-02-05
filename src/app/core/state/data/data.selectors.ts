@@ -35,7 +35,7 @@ export const selectTotalWorkHoursDiff = createSelector(selectData, (state: DataS
 
     if (
       week.week.year > todayWeekIdentifier.year ||
-      (week.week.year === todayWeekIdentifier.year && week.week.weekNumber > startDateWeekIdentifier.weekNumber)
+      (week.week.year === todayWeekIdentifier.year && week.week.weekNumber > todayWeekIdentifier.weekNumber)
     ) {
       return acc1;
     }
