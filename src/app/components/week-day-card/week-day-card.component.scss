@@ -8,9 +8,6 @@
 .day {
   display: flex;
   flex-direction: column;
-  background: $day-background;
-
-  box-shadow: 0 0 0.5em 0.25em rgba(0, 0, 0, 0.1);
 
   input[type='time'],
   input[type='date'] {
@@ -18,17 +15,16 @@
   }
 
   &.today {
-    background: red;
-  }
-
-  &,
-  .day-title {
-    border-radius: 0.25em;
+    &,
+    .day-title {
+      box-shadow: inset 0 0 0 2px $primary;
+    }
   }
 
   .day-title {
     font-weight: bold;
     margin: 0;
+    border-radius: 0.25em;
 
     background: darken($foreground, 80%);
 
@@ -131,6 +127,13 @@
         text-align: center;
         opacity: 0.5;
       }
+    }
+
+    .buttons {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1em;
     }
   }
 }

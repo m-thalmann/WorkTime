@@ -5,7 +5,15 @@ export interface TimeRange {
 
 export class TimeRangeHelper {
   static fromTime(start: string, end: string): TimeRange {
-    return { startHours: this.getHoursFromString(start), endHours: this.getHoursFromString(end) };
+    const data = { startHours: this.getHoursFromString(start), endHours: this.getHoursFromString(end) };
+
+    if (data.startHours > data.endHours) {
+      const tmp = data.startHours;
+      data.startHours = data.endHours;
+      data.endHours = tmp;
+    }
+
+    return data;
   }
 
   static getHoursFromString(hourString: string) {

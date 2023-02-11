@@ -1,6 +1,9 @@
 <ng-container *ngIf="{ hoursPerDay: hoursPerDay$ | async } as vm">
-    <div class="day" [class.today]="isDayToday" [class.future]="isDayInFuture">
-        <p class="day-title">{{ dayDateString }}</p>
+    <app-card class="day" [class.today]="isDayToday" [class.future]="isDayInFuture">
+        <p class="day-title">
+            <i class="fa-solid fa-location-dot fg-accent" *ngIf="isDayToday"></i>
+            {{ dayDateString }}
+        </p>
         <div class="day-content">
             <ng-container *ngIf="workEntry; else noEntry">
                 <ng-container *ngIf="workDay; else holiday">
@@ -20,7 +23,7 @@
 
                     <div class="times">
                         <app-week-day-card-time-input-wrapper>
-                            <input type="time" [value]="workDay.timeRange.startHours | hours" class="start-input" />
+                            <input type="time" [(ngModel)]="workDayStart" class="start-input" />
                         </app-week-day-card-time-input-wrapper>
 
                         <app-week-day-card-pauses
@@ -29,7 +32,7 @@
                         ></app-week-day-card-pauses>
 
                         <app-week-day-card-time-input-wrapper>
-                            <input type="time" [value]="workDay.timeRange.endHours | hours" class="end-input" />
+                            <input type="time" [(ngModel)]="workDayEnd" class="end-input" />
                         </app-week-day-card-time-input-wrapper>
                     </div>
                 </ng-container>
@@ -41,10 +44,17 @@
                     </p>
                 </ng-template>
 
-                <button (click)="removeWorkEntry()">
-                    <i class="fa-solid fa-calendar-xmark"></i>
-                    Clear entry
-                </button>
+                <div class="buttons">
+                    <button (click)="updateWorkDayEntry()" data-color="primary" *ngIf="hasChanges">
+                        <i class="fa-solid fa-check"></i>
+                        Save changes
+                    </button>
+
+                    <button (click)="removeWorkEntry()">
+                        <i class="fa-solid fa-calendar-xmark"></i>
+                        Clear entry
+                    </button>
+                </div>
             </ng-container>
 
             <ng-template #noEntry>
@@ -65,6 +75,6 @@
                 </div>
             </ng-template>
         </div>
-    </div>
+    </app-card>
 </ng-container>
 

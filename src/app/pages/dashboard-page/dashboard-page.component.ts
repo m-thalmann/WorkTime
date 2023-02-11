@@ -15,6 +15,7 @@ import {
   selectWorkWeeks,
 } from 'src/app/core/state/data/data.selectors';
 import { WeekDayCardComponent } from '../../components/week-day-card/week-day-card.component';
+import { CardComponent } from '../../components/card/card.component';
 
 @Component({
   selector: 'app-dashboard-page',
@@ -22,7 +23,7 @@ import { WeekDayCardComponent } from '../../components/week-day-card/week-day-ca
   templateUrl: './dashboard-page.component.html',
   styleUrls: ['./dashboard-page.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, HoursPipe, WeekDayCardComponent],
+  imports: [CommonModule, HoursPipe, WeekDayCardComponent, CardComponent],
 })
 export class DashboardPageComponent {
   hoursPerDay$ = this.store.select(selectHoursPerDay);
