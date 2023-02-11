@@ -24,9 +24,8 @@
                         </app-week-day-card-time-input-wrapper>
 
                         <app-week-day-card-pauses
-                            [weekStart]="weekStart"
-                            [weekDay]="weekDay"
-                            [workDayEntry]="workDay"
+                            [weekDayIdentifier]="weekDayIdentifier"
+                            [pauses]="workDay.pauses"
                         ></app-week-day-card-pauses>
 
                         <app-week-day-card-time-input-wrapper>

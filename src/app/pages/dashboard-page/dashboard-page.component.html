@@ -19,8 +19,7 @@
     <div class="week">
         <app-week-day-card
             *ngFor="let day of weekDays"
-            [weekStart]="vm.week!"
-            [weekDay]="day"
+            [weekDayIdentifier]="getWeekDayIdentifier(day)"
             [workEntry]="vm.data?.entries?.[day] || null"
         ></app-week-day-card>
     </div>

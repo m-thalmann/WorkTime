@@ -1,10 +1,17 @@
 import { createReducer, on } from '@ngrx/store';
 import { WeekIdentifierHelper } from '../../models/week-identifier.model';
-import { DataActions } from './data.actions';
+import { isWorkDayEntry } from '../../models/work-entry.model';
+import { DataActions, DataWorkEntriesActions } from './data.actions';
 import { DataState, InitialDataState } from './data.state';
 
 export const dataReducer = createReducer(
   InitialDataState,
+
+  /*
+   |--------------------
+   | Data Actions
+   |--------------------
+   */
 
   on(DataActions.loadData, (state) => ({ ...state, loaded: false })),
 
@@ -12,7 +19,17 @@ export const dataReducer = createReducer(
     return { ...state, workWeeks, hoursPerDay, workStartDate, loaded: true };
   }),
 
-  on(DataActions.setWorkEntry, (state, { week, dayOfWeek, entry }) => {
+  on(DataActions.setWorkStartDate, (state, { date }) => {
+    return { ...state, workStartDate: date };
+  }),
+
+  /*
+   |--------------------
+   | Data Work Entries Actions
+   |--------------------
+   */
+
+  on(DataWorkEntriesActions.setEntry, (state, { week, dayOfWeek, entry }) => {
     let newState: DataState = { ...state, workWeeks: { ...state.workWeeks } };
 
     const weekKey = WeekIdentifierHelper.getKey(week);
@@ -31,7 +48,7 @@ export const dataReducer = createReducer(
     return newState;
   }),
 
-  on(DataActions.removeWorkEntry, (state, { week, dayOfWeek }) => {
+  on(DataWorkEntriesActions.removeEntry, (state, { week, dayOfWeek }) => {
     const weekKey = WeekIdentifierHelper.getKey(week);
 
     if (!(weekKey in state.workWeeks) || !(dayOfWeek in state.workWeeks[weekKey].entries)) {
@@ -45,7 +62,69 @@ export const dataReducer = createReducer(
     return { ...state, workWeeks: newWorkWeeks };
   }),
 
-  on(DataActions.setWorkStartDate, (state, { date }) => {
-    return { ...state, workStartDate: date };
+  on(DataWorkEntriesActions.addPause, (state, { week, dayOfWeek, pause }) => {
+    const weekKey = WeekIdentifierHelper.getKey(week);
+
+    const entry = { ...state.workWeeks[weekKey]?.entries?.[dayOfWeek] };
+
+    if (!entry || !isWorkDayEntry(entry)) {
+      return state;
+    }
+
+    entry.pauses = [...entry.pauses, pause].sort((a, b) => {
+      return a.startHours - b.startHours;
+    });
+
+    let newState: DataState = { ...state, workWeeks: { ...state.workWeeks } };
+    newState.workWeeks[weekKey] = { ...state.workWeeks[weekKey], entries: { ...state.workWeeks[weekKey].entries } };
+    newState.workWeeks[weekKey].entries[dayOfWeek] = {
+      ...entry,
+    };
+
+    return newState;
+  }),
+
+  on(DataWorkEntriesActions.updatePause, (state, { week, dayOfWeek, pause, pauseIndex }) => {
+    const weekKey = WeekIdentifierHelper.getKey(week);
+
+    const entry = { ...state.workWeeks[weekKey]?.entries?.[dayOfWeek] };
+
+    if (!entry || !isWorkDayEntry(entry) || pauseIndex >= entry.pauses.length) {
+      return state;
+    }
+
+    entry.pauses = [...entry.pauses];
+    entry.pauses[pauseIndex] = pause;
+    entry.pauses = entry.pauses.sort((a, b) => {
+      return a.startHours - b.startHours;
+    });
+
+    let newState: DataState = { ...state, workWeeks: { ...state.workWeeks } };
+    newState.workWeeks[weekKey] = { ...state.workWeeks[weekKey], entries: { ...state.workWeeks[weekKey].entries } };
+    newState.workWeeks[weekKey].entries[dayOfWeek] = {
+      ...entry,
+    };
+
+    return newState;
+  }),
+
+  on(DataWorkEntriesActions.removePause, (state, { week, dayOfWeek, pauseIndex }) => {
+    const weekKey = WeekIdentifierHelper.getKey(week);
+
+    const entry = { ...state.workWeeks[weekKey]?.entries?.[dayOfWeek] };
+
+    if (!entry || !isWorkDayEntry(entry) || pauseIndex >= entry.pauses.length) {
+      return state;
+    }
+
+    entry.pauses = entry.pauses.filter((_, index) => index !== pauseIndex);
+
+    let newState: DataState = { ...state, workWeeks: { ...state.workWeeks } };
+    newState.workWeeks[weekKey] = { ...state.workWeeks[weekKey], entries: { ...state.workWeeks[weekKey].entries } };
+    newState.workWeeks[weekKey].entries[dayOfWeek] = {
+      ...entry,
+    };
+
+    return newState;
   })
 );

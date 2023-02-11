@@ -5,7 +5,7 @@ import { BehaviorSubject, combineLatest, map, Observable } from 'rxjs';
 import DateHelpers from 'src/app/core/helpers/DateHelpers';
 import { DayOfWeek, DaysOfWeek } from 'src/app/core/models/day-of-week.model';
 import { WeekIdentifierHelper } from 'src/app/core/models/week-identifier.model';
-import { WorkWeek } from 'src/app/core/models/work-week.model';
+import { WorkWeek, WeekDayIdentifier } from 'src/app/core/models/work-week.model';
 import { HoursPipe } from 'src/app/core/pipes/hours.pipe';
 import { DataActions } from 'src/app/core/state/data/data.actions';
 import {
@@ -70,6 +70,12 @@ export class DashboardPageComponent {
 
   getDayData(data: WorkWeek, day: DayOfWeek) {
     return data.entries[day];
+  }
+
+  getWeekDayIdentifier(day: DayOfWeek) {
+    let week = WeekIdentifierHelper.fromDate(this.currentWeekStart$.value);
+
+    return { week, weekDay: day } as WeekDayIdentifier;
   }
 
   setWorkStartDate(date: string) {

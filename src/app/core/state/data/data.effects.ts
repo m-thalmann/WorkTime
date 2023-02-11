@@ -4,7 +4,7 @@ import { createEffect } from '@ngrx/effects';
 import { ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { map, withLatestFrom } from 'rxjs';
-import { DataActions } from './data.actions';
+import { DataActions, DataWorkEntriesActions } from './data.actions';
 import { selectData } from './data.selectors';
 import { DataStateStorageKey, InitialDataState } from './data.state';
 
@@ -30,7 +30,14 @@ export class DataEffects {
   saveData$ = createEffect(
     () =>
       this.actions$.pipe(
-        ofType(DataActions.setWorkEntry, DataActions.removeWorkEntry, DataActions.setWorkStartDate),
+        ofType(
+          DataWorkEntriesActions.setEntry,
+          DataWorkEntriesActions.removeEntry,
+          DataWorkEntriesActions.addPause,
+          DataWorkEntriesActions.updatePause,
+          DataWorkEntriesActions.removePause,
+          DataActions.setWorkStartDate
+        ),
         withLatestFrom(this.store.select(selectData)),
         map(([_, data]) => {
           localStorage.setItem(

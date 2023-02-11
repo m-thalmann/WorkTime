@@ -1,3 +1,4 @@
+import { DayOfWeek } from './day-of-week.model';
 import { WeekIdentifier } from './week-identifier.model';
 import { isHoliday, WorkEntry, WorkEntryHelper } from './work-entry.model';
 
@@ -5,6 +6,11 @@ export interface WorkWeek {
   week: WeekIdentifier;
 
   entries: { [key: string]: WorkEntry };
+}
+
+export interface WeekDayIdentifier {
+  week: WeekIdentifier;
+  weekDay: DayOfWeek;
 }
 
 export class WorkWeekHelper {

@@ -1,7 +1,7 @@
 import { createActionGroup, emptyProps, props } from '@ngrx/store';
 import { DayOfWeek } from '../../models/day-of-week.model';
 import { WeekIdentifier } from '../../models/week-identifier.model';
-import { WorkEntry } from '../../models/work-entry.model';
+import { WorkDayEntry, WorkEntry } from '../../models/work-entry.model';
 import { DataState } from './data.state';
 
 export const DataActions = createActionGroup({
@@ -14,10 +14,23 @@ export const DataActions = createActionGroup({
       workStartDate: DataState['workStartDate'];
     }>(),
 
-    'Set work entry': props<{ week: WeekIdentifier; dayOfWeek: DayOfWeek; entry: WorkEntry }>(),
-
-    'Remove work entry': props<{ week: WeekIdentifier; dayOfWeek: DayOfWeek }>(),
-
     'Set work start date': props<{ date: string }>(),
+  },
+});
+
+export const DataWorkEntriesActions = createActionGroup({
+  source: 'Data work entries',
+  events: {
+    'Set entry': props<{ week: WeekIdentifier; dayOfWeek: DayOfWeek; entry: WorkEntry }>(),
+    'Remove entry': props<{ week: WeekIdentifier; dayOfWeek: DayOfWeek }>(),
+
+    'Add pause': props<{ week: WeekIdentifier; dayOfWeek: DayOfWeek; pause: WorkDayEntry['pauses'][0] }>(),
+    'Update pause': props<{
+      week: WeekIdentifier;
+      dayOfWeek: DayOfWeek;
+      pauseIndex: number;
+      pause: WorkDayEntry['pauses'][0];
+    }>(),
+    'Remove pause': props<{ week: WeekIdentifier; dayOfWeek: DayOfWeek; pauseIndex: number }>(),
   },
 });

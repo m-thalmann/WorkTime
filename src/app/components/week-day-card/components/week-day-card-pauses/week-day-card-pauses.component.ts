@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
-import { DayOfWeek } from 'src/app/core/models/day-of-week.model';
 import { WorkDayEntry } from 'src/app/core/models/work-entry.model';
+import { WeekDayIdentifier } from 'src/app/core/models/work-week.model';
 import { WeekDayCardPauseComponent } from '../week-day-card-pause/week-day-card-pause.component';
 
 @Component({
@@ -13,9 +13,8 @@ import { WeekDayCardPauseComponent } from '../week-day-card-pause/week-day-card-
   imports: [CommonModule, WeekDayCardPauseComponent],
 })
 export class WeekDayCardPausesComponent {
-  @Input() weekStart!: Date;
-  @Input() weekDay!: DayOfWeek;
-  @Input() workDayEntry!: WorkDayEntry;
+  @Input() weekDayIdentifier!: WeekDayIdentifier;
+  @Input() pauses!: WorkDayEntry['pauses'];
 
   isAddingPause = false;
 }

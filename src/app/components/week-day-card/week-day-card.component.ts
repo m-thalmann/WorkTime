@@ -2,11 +2,12 @@ import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { Store } from '@ngrx/store';
 import DateHelpers from 'src/app/core/helpers/DateHelpers';
-import { DayOfWeek, DaysOfWeek } from 'src/app/core/models/day-of-week.model';
+import { DaysOfWeek } from 'src/app/core/models/day-of-week.model';
 import { WeekIdentifierHelper } from 'src/app/core/models/week-identifier.model';
 import { HolidayEntry, isWorkDayEntry, WorkEntry, WorkEntryHelper } from 'src/app/core/models/work-entry.model';
+import { WeekDayIdentifier } from 'src/app/core/models/work-week.model';
 import { HoursPipe } from 'src/app/core/pipes/hours.pipe';
-import { DataActions } from 'src/app/core/state/data/data.actions';
+import { DataWorkEntriesActions } from 'src/app/core/state/data/data.actions';
 import { selectHoursPerDay } from 'src/app/core/state/data/data.selectors';
 import { WeekDayCardPausesComponent } from './components/week-day-card-pauses/week-day-card-pauses.component';
 import { WeekDayCardTimeInputWrapperComponent } from './components/week-day-card-time-input-wrapper/week-day-card-time-input-wrapper.component';
@@ -20,8 +21,7 @@ import { WeekDayCardTimeInputWrapperComponent } from './components/week-day-card
   imports: [CommonModule, HoursPipe, WeekDayCardPausesComponent, WeekDayCardTimeInputWrapperComponent],
 })
 export class WeekDayCardComponent {
-  @Input() weekStart!: Date;
-  @Input() weekDay!: DayOfWeek;
+  @Input() weekDayIdentifier!: WeekDayIdentifier;
   @Input() workEntry!: WorkEntry | null;
 
   hoursPerDay$ = this.store.select(selectHoursPerDay);
@@ -29,11 +29,19 @@ export class WeekDayCardComponent {
   constructor(private store: Store) {}
 
   get week() {
-    return WeekIdentifierHelper.fromDate(this.weekStart);
+    return this.weekDayIdentifier.week;
+  }
+
+  get weekDay() {
+    return this.weekDayIdentifier.weekDay;
+  }
+
+  get weekStart() {
+    return WeekIdentifierHelper.getStartOfWeek(this.week);
   }
 
   get date() {
-    let dayIndex = DaysOfWeek.indexOf(this.weekDay);
+    let dayIndex = DaysOfWeek.indexOf(this.weekDayIdentifier.weekDay);
 
     let date = new Date(this.weekStart);
     date.setDate(date.getDate() + dayIndex);
@@ -69,7 +77,7 @@ export class WeekDayCardComponent {
     let week = WeekIdentifierHelper.fromDate(this.weekStart);
 
     this.store.dispatch(
-      DataActions.setWorkEntry({
+      DataWorkEntriesActions.setEntry({
         week: week,
         dayOfWeek: this.weekDay,
         entry: { timeRange: { startHours: 8, endHours: 17 }, pauses: [] },
@@ -79,12 +87,12 @@ export class WeekDayCardComponent {
 
   addHolidayEntry() {
     this.store.dispatch(
-      DataActions.setWorkEntry({ week: this.week, dayOfWeek: this.weekDay, entry: {} as HolidayEntry })
+      DataWorkEntriesActions.setEntry({ week: this.week, dayOfWeek: this.weekDay, entry: {} as HolidayEntry })
     );
   }
 
   removeWorkEntry() {
-    this.store.dispatch(DataActions.removeWorkEntry({ week: this.week, dayOfWeek: this.weekDay }));
+    this.store.dispatch(DataWorkEntriesActions.removeEntry({ week: this.week, dayOfWeek: this.weekDay }));
   }
 }
 

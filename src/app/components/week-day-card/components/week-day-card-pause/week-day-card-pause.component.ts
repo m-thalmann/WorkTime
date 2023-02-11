@@ -6,8 +6,9 @@ import { DayOfWeek } from 'src/app/core/models/day-of-week.model';
 import { TimeRange, TimeRangeHelper } from 'src/app/core/models/time-range.model';
 import { WeekIdentifierHelper } from 'src/app/core/models/week-identifier.model';
 import { WorkDayEntry } from 'src/app/core/models/work-entry.model';
+import { WeekDayIdentifier } from 'src/app/core/models/work-week.model';
 import { HoursPipe } from 'src/app/core/pipes/hours.pipe';
-import { DataActions } from 'src/app/core/state/data/data.actions';
+import { DataActions, DataWorkEntriesActions } from 'src/app/core/state/data/data.actions';
 import { WeekDayCardTimeInputWrapperComponent } from '../week-day-card-time-input-wrapper/week-day-card-time-input-wrapper.component';
 
 @Component({
@@ -19,9 +20,7 @@ import { WeekDayCardTimeInputWrapperComponent } from '../week-day-card-time-inpu
   imports: [CommonModule, WeekDayCardTimeInputWrapperComponent, HoursPipe, FormsModule],
 })
 export class WeekDayCardPauseComponent {
-  @Input() weekStart!: Date;
-  @Input() weekDay!: DayOfWeek;
-  @Input() workDayEntry!: WorkDayEntry;
+  @Input() weekDayIdentifier!: WeekDayIdentifier;
   @Input()
   set pause(pause: TimeRange | null) {
     if (pause) {
@@ -61,7 +60,11 @@ export class WeekDayCardPauseComponent {
   }
 
   get week() {
-    return WeekIdentifierHelper.fromDate(this.weekStart);
+    return this.weekDayIdentifier.week;
+  }
+
+  get weekDay() {
+    return this.weekDayIdentifier.weekDay;
   }
 
   saveEntry() {
@@ -69,31 +72,33 @@ export class WeekDayCardPauseComponent {
       return;
     }
 
-    this.store.dispatch(
-      DataActions.setWorkEntry({
-        week: this.week,
-        dayOfWeek: this.weekDay,
-        entry: {
-          ...this.workDayEntry,
-          pauses: [...this.workDayEntry.pauses, TimeRangeHelper.fromTime(this.pauseStart, this.pauseEnd)],
-        },
-      })
-    );
+    const pause = TimeRangeHelper.fromTime(this.pauseStart, this.pauseEnd);
 
     if (this.isNew) {
+      this.store.dispatch(DataWorkEntriesActions.addPause({ week: this.week, dayOfWeek: this.weekDay, pause }));
+
       this.finishAddPause.emit();
       this.pauseStart = null;
       this.pauseEnd = null;
+    } else {
+      this.store.dispatch(
+        DataWorkEntriesActions.updatePause({
+          week: this.week,
+          dayOfWeek: this.weekDay,
+          pauseIndex: this.pauseIndex!,
+          pause,
+        })
+      );
     }
   }
 
   removeEntry() {
     if (!this.isNew) {
       this.store.dispatch(
-        DataActions.setWorkEntry({
+        DataWorkEntriesActions.removePause({
           week: this.week,
           dayOfWeek: this.weekDay,
-          entry: { ...this.workDayEntry, pauses: this.workDayEntry.pauses.filter((_, i) => i !== this.pauseIndex) },
+          pauseIndex: this.pauseIndex!,
         })
       );
     }
