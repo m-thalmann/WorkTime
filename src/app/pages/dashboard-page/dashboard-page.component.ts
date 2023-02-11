@@ -1,11 +1,12 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { BehaviorSubject, combineLatest, map, Observable } from 'rxjs';
-import DateHelpers from 'src/app/core/helpers/DateHelpers';
+import { combineLatest, map, Observable } from 'rxjs';
 import { DayOfWeek, DaysOfWeek } from 'src/app/core/models/day-of-week.model';
-import { WeekIdentifierHelper } from 'src/app/core/models/week-identifier.model';
-import { WorkWeek, WeekDayIdentifier } from 'src/app/core/models/work-week.model';
+import { TimeRangeHelper } from 'src/app/core/models/time-range.model';
+import { WeekIdentifier, WeekIdentifierHelper } from 'src/app/core/models/week-identifier.model';
+import { WeekDayIdentifier, WorkWeek } from 'src/app/core/models/work-week.model';
 import { HoursPipe } from 'src/app/core/pipes/hours.pipe';
 import { DataActions } from 'src/app/core/state/data/data.actions';
 import {
@@ -14,9 +15,8 @@ import {
   selectWorkStartDate,
   selectWorkWeeks,
 } from 'src/app/core/state/data/data.selectors';
-import { WeekDayCardComponent } from '../../components/week-day-card/week-day-card.component';
 import { CardComponent } from '../../components/card/card.component';
-import { TimeRangeHelper } from 'src/app/core/models/time-range.model';
+import { WeekDayCardComponent } from '../../components/week-day-card/week-day-card.component';
 
 @Component({
   selector: 'app-dashboard-page',
@@ -31,15 +31,24 @@ export class DashboardPageComponent {
   workStartDate$ = this.store.select(selectWorkStartDate);
   totalWorkHoursDiff$ = this.store.select(selectTotalWorkHoursDiff);
 
-  currentWeekStart$ = new BehaviorSubject(DateHelpers.getStartOfWeek(new Date()));
+  selectedWeek$: Observable<WeekIdentifier> = this.route.queryParams.pipe(
+    map((params) => {
+      const year = parseInt(params['year']);
+      const weekNumber = parseInt(params['week']);
 
-  currentWeekData$: Observable<WorkWeek> = combineLatest([
-    this.currentWeekStart$,
-    this.store.select(selectWorkWeeks),
-  ]).pipe(
-    map(([weekStartDate, weekData]) => {
-      let week = WeekIdentifierHelper.fromDate(weekStartDate);
+      if (!year || !weekNumber) {
+        return WeekIdentifierHelper.fromDate(new Date());
+      }
 
+      return {
+        year,
+        weekNumber,
+      };
+    })
+  );
+
+  currentWeekData$: Observable<WorkWeek> = combineLatest([this.selectedWeek$, this.store.select(selectWorkWeeks)]).pipe(
+    map(([week, weekData]) => {
       const data = weekData[WeekIdentifierHelper.getKey(week)];
 
       if (data !== undefined) {
@@ -53,30 +62,38 @@ export class DashboardPageComponent {
     })
   );
 
-  constructor(private store: Store) {}
+  constructor(private store: Store, private route: ActivatedRoute, private router: Router) {}
 
   get weekDays() {
     return DaysOfWeek;
   }
 
-  nextWeek(amount: number) {
-    let nextDate = new Date(this.currentWeekStart$.value);
-    nextDate.setDate(nextDate.getDate() + 7 * amount);
+  nextWeek(week: WeekIdentifier, amount: number) {
+    const weekDate = WeekIdentifierHelper.getStartOfWeek(week);
+    weekDate.setDate(weekDate.getDate() + 7 * amount);
 
-    this.currentWeekStart$.next(DateHelpers.getStartOfWeek(nextDate));
+    const newWeek = WeekIdentifierHelper.fromDate(weekDate);
+
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { year: newWeek.year, week: newWeek.weekNumber },
+      queryParamsHandling: 'merge',
+    });
   }
 
   goToThisWeek() {
-    this.currentWeekStart$.next(DateHelpers.getStartOfWeek(new Date()));
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { year: null, week: null },
+      queryParamsHandling: 'merge',
+    });
   }
 
   getDayData(data: WorkWeek, day: DayOfWeek) {
     return data.entries[day];
   }
 
-  getWeekDayIdentifier(day: DayOfWeek) {
-    let week = WeekIdentifierHelper.fromDate(this.currentWeekStart$.value);
-
+  getWeekDayIdentifier(week: WeekIdentifier, day: DayOfWeek) {
     return { week, weekDay: day } as WeekDayIdentifier;
   }
 

@@ -1,6 +1,6 @@
 <ng-container
     *ngIf="{
-        week: currentWeekStart$ | async,
+        week: selectedWeek$ | async,
         data: currentWeekData$ | async,
         hoursPerDay: hoursPerDay$ | async,
         workStartDate: workStartDate$ | async,
@@ -8,18 +8,18 @@
     } as vm"
 >
     <div class="week-selector">
-        <button (click)="nextWeek(-1)" data-color="primary"><i class="fa-solid fa-arrow-left"></i></button>
+        <button (click)="nextWeek(vm.week!, -1)" data-color="primary"><i class="fa-solid fa-arrow-left"></i></button>
         <span
-            >Week <strong>{{ vm.week | date : 'ww, y' }}</strong></span
+            >Week <strong>{{ (vm.week!.weekNumber | number : '2.0') + ', ' + vm.week!.year }}</strong></span
         >
-        <button (click)="nextWeek(1)" data-color="primary"><i class="fa-solid fa-arrow-right"></i></button>
+        <button (click)="nextWeek(vm.week!, 1)" data-color="primary"><i class="fa-solid fa-arrow-right"></i></button>
         <button (click)="goToThisWeek()" data-color="primary"><i class="fa-solid fa-calendar-week"></i></button>
     </div>
 
     <div class="week">
         <app-week-day-card
             *ngFor="let day of weekDays"
-            [weekDayIdentifier]="getWeekDayIdentifier(day)"
+            [weekDayIdentifier]="getWeekDayIdentifier(vm.week!, day)"
             [workEntry]="vm.data?.entries?.[day] || null"
         ></app-week-day-card>
     </div>
