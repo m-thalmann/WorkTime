@@ -19,6 +19,14 @@ export const dataReducer = createReducer(
     return { ...state, workWeeks, hoursPerDay, workStartDate, loaded: true };
   }),
 
+  on(DataActions.resetData, (_) => {
+    return { ...InitialDataState, loaded: true };
+  }),
+
+  on(DataActions.setHoursPerDay, (state, { hours }) => {
+    return { ...state, hoursPerDay: hours };
+  }),
+
   on(DataActions.setWorkStartDate, (state, { date }) => {
     return { ...state, workStartDate: date };
   }),

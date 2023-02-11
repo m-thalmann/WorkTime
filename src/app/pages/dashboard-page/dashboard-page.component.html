@@ -34,7 +34,12 @@
 
         <label>
             Work hours per day
-            <input type="time" [value]="vm.hoursPerDay | hours" />
+            <input
+                type="time"
+                [value]="vm.hoursPerDay | hours"
+                (change)="setHoursPerDay(hoursPerDayInput.value)"
+                #hoursPerDayInput
+            />
         </label>
 
         <label>
@@ -46,5 +51,10 @@
                 #workStartDateInput
             />
         </label>
+
+        <button (click)="resetData()" class="reset-button">
+            <i class="fa-solid fa-user-xmark"></i>
+            Reset data
+        </button>
     </app-card>
 </ng-container>

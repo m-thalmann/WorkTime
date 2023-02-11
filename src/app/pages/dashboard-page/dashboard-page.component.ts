@@ -16,6 +16,7 @@ import {
 } from 'src/app/core/state/data/data.selectors';
 import { WeekDayCardComponent } from '../../components/week-day-card/week-day-card.component';
 import { CardComponent } from '../../components/card/card.component';
+import { TimeRangeHelper } from 'src/app/core/models/time-range.model';
 
 @Component({
   selector: 'app-dashboard-page',
@@ -79,7 +80,19 @@ export class DashboardPageComponent {
     return { week, weekDay: day } as WeekDayIdentifier;
   }
 
+  setHoursPerDay(hours: string) {
+    this.store.dispatch(DataActions.setHoursPerDay({ hours: TimeRangeHelper.getHoursFromString(hours) }));
+  }
+
   setWorkStartDate(date: string) {
     this.store.dispatch(DataActions.setWorkStartDate({ date }));
+  }
+
+  resetData() {
+    if (!confirm('Are you sure you want to remove all data?')) {
+      return;
+    }
+
+    this.store.dispatch(DataActions.resetData());
   }
 }

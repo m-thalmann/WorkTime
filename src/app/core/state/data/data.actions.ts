@@ -14,6 +14,9 @@ export const DataActions = createActionGroup({
       workStartDate: DataState['workStartDate'];
     }>(),
 
+    'Reset data': emptyProps(),
+
+    'Set hours per day': props<{ hours: number }>(),
     'Set work start date': props<{ date: string }>(),
   },
 });

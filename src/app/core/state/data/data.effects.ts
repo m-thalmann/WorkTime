@@ -31,12 +31,14 @@ export class DataEffects {
     () =>
       this.actions$.pipe(
         ofType(
+          DataActions.resetData,
+          DataActions.setWorkStartDate,
+          DataActions.setHoursPerDay,
           DataWorkEntriesActions.setEntry,
           DataWorkEntriesActions.removeEntry,
           DataWorkEntriesActions.addPause,
           DataWorkEntriesActions.updatePause,
-          DataWorkEntriesActions.removePause,
-          DataActions.setWorkStartDate
+          DataWorkEntriesActions.removePause
         ),
         withLatestFrom(this.store.select(selectData)),
         map(([_, data]) => {

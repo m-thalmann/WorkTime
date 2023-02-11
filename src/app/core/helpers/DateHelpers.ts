@@ -19,23 +19,25 @@ class DateHelpers {
       return 0;
     }
 
+    const workDays = DaysOfWeek.length;
+
     const startDateDay = (startDate.getDay() || 7) - 1;
     const endDateDay = (endDate.getDay() || 7) - 1;
 
-    let firstWeekDays = Math.max(0, 7 - 2 - startDateDay);
+    let firstWeekDays = Math.max(0, workDays - startDateDay);
     let lastWeekDays = 0;
 
-    if (DateHelpers.getStartOfWeek(startDate).getTime() !== DateHelpers.getStartOfWeek(endDate).getTime()) {
-      lastWeekDays = Math.max(0, Math.min(5, 1 + endDateDay));
+    if (!this.isSameWeek(startDate, endDate)) {
+      lastWeekDays = Math.max(0, Math.min(workDays, 1 + endDateDay));
     }
 
     const totalDayDiff = DateHelpers.getTotalDays(startDate, endDate);
 
-    const fullWeekDiffDays = totalDayDiff - (7 - startDateDay) - (1 + endDateDay);
+    const fullWeekDiffDays = totalDayDiff - firstWeekDays - lastWeekDays;
     let fullWeekWorkDays = 0;
 
-    if (fullWeekDiffDays % 7 === 0) {
-      fullWeekWorkDays = fullWeekDiffDays * (5 / 7);
+    if (fullWeekDiffDays > 0 && fullWeekDiffDays % 7 === 0) {
+      fullWeekWorkDays = fullWeekDiffDays * (workDays / 7);
     }
 
     return fullWeekWorkDays + firstWeekDays + lastWeekDays;
@@ -50,6 +52,10 @@ class DateHelpers {
     today.setHours(0, 0, 0, 0);
 
     return today < date;
+  }
+
+  static isSameWeek(date1: Date, date2: Date) {
+    return DateHelpers.getStartOfWeek(date1).getTime() === DateHelpers.getStartOfWeek(date2).getTime();
   }
 
   static getDayDateString(date: Date) {
