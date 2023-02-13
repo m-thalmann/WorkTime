@@ -19,28 +19,25 @@ class DateHelpers {
       return 0;
     }
 
+    // TODO: improve time complexity
+
     const workDays = DaysOfWeek.length;
 
-    const startDateDay = (startDate.getDay() || 7) - 1;
-    const endDateDay = (endDate.getDay() || 7) - 1;
+    let count = 0;
 
-    let firstWeekDays = Math.max(0, workDays - startDateDay);
-    let lastWeekDays = 0;
+    for (
+      const currentDate = new Date(startDate.getTime());
+      currentDate <= endDate;
+      currentDate.setDate(currentDate.getDate() + 1)
+    ) {
+      const dayOfWeek = currentDate.getDay() || 7;
 
-    if (!this.isSameWeek(startDate, endDate)) {
-      lastWeekDays = Math.max(0, Math.min(workDays, 1 + endDateDay));
+      if (dayOfWeek <= workDays) {
+        count++;
+      }
     }
 
-    const totalDayDiff = DateHelpers.getTotalDays(startDate, endDate);
-
-    const fullWeekDiffDays = totalDayDiff - firstWeekDays - lastWeekDays;
-    let fullWeekWorkDays = 0;
-
-    if (fullWeekDiffDays > 0 && fullWeekDiffDays % 7 === 0) {
-      fullWeekWorkDays = fullWeekDiffDays * (workDays / 7);
-    }
-
-    return fullWeekWorkDays + firstWeekDays + lastWeekDays;
+    return count;
   }
 
   static isToday(date: Date) {
