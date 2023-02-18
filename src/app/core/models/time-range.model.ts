@@ -17,16 +17,18 @@ export class TimeRangeHelper {
   }
 
   static getHoursFromString(hourString: string) {
-    let [hours, minutes] = hourString.split(':').map((v: string) => parseInt(v));
+    const [hours, minutes] = hourString.split(':').map((v: string) => parseInt(v));
 
     return hours + Math.round((minutes / 60) * 1000) / 1000;
   }
 
   static getTimeString(totalHours: number) {
-    let sign = totalHours >= 0 ? '' : '-';
-    let absHours = Math.abs(totalHours);
-    let hours = Math.floor(absHours);
-    let minutes = Math.round((absHours - hours) * 60);
+    const totalMinutes = Math.round(totalHours * 60);
+    const sign = totalMinutes !== 0 && totalMinutes < 0 ? '-' : '';
+    const absTotalMinutes = Math.abs(totalMinutes);
+
+    const hours = Math.floor(absTotalMinutes / 60);
+    const minutes = absTotalMinutes % 60;
 
     return sign + hours.toString().padStart(2, '0') + ':' + minutes.toString().padStart(2, '0');
   }
