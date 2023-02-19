@@ -5,10 +5,10 @@
 }
 
 header {
-  display: flex;
+  display: grid;
+  grid-template-columns: 3em auto 3em;
   align-items: center;
-  justify-content: center;
-  gap: 0.5em;
+  gap: 1em;
   margin-bottom: 1em;
   padding: 1em $main-padding;
 
@@ -17,12 +17,42 @@ header {
   background: darken($background, 5%);
   box-shadow: 0 -0.25em 0.5em 0.25em rgba(0, 0, 0, 0.25);
 
-  img {
-    height: 3em;
+  .nav-button.hidden {
+    display: none;
   }
 
-  h1 {
-    margin: 0;
+  .title {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1em;
+
+    img {
+      height: 3em;
+    }
+
+    h1 {
+      margin: 0;
+    }
+
+    .total-work-diff {
+      display: block;
+      width: fit-content;
+      padding: 0.5em 0.75em;
+
+      border-radius: 0.5em;
+
+      text-align: center;
+      font-size: 0.9em;
+      font-weight: lighter;
+
+      background: #d66e05;
+      color: white;
+
+      &.reached {
+        background: green;
+      }
+    }
   }
 }
 

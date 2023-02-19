@@ -1,5 +1,4 @@
 @use 'variables' as *;
-@use 'element-mixins';
 
 :host {
   display: block;
@@ -8,11 +7,6 @@
 .day {
   display: flex;
   flex-direction: column;
-
-  input[type='time'],
-  input[type='date'] {
-    @include element-mixins.dateOrTimeInput();
-  }
 
   &.today {
     &,

@@ -4,11 +4,9 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { combineLatest, map, Observable } from 'rxjs';
 import { DayOfWeek, DaysOfWeek } from 'src/app/core/models/day-of-week.model';
-import { TimeRangeHelper } from 'src/app/core/models/time-range.model';
 import { WeekIdentifier, WeekIdentifierHelper } from 'src/app/core/models/week-identifier.model';
 import { WeekDayIdentifier, WorkWeek } from 'src/app/core/models/work-week.model';
 import { HoursPipe } from 'src/app/core/pipes/hours.pipe';
-import { DataActions } from 'src/app/core/state/data/data.actions';
 import {
   selectHoursPerDay,
   selectTotalWorkHoursDiff,
@@ -27,10 +25,6 @@ import { WeekDayCardComponent } from '../../components/week-day-card/week-day-ca
   imports: [CommonModule, HoursPipe, WeekDayCardComponent, CardComponent],
 })
 export class DashboardPageComponent {
-  hoursPerDay$ = this.store.select(selectHoursPerDay);
-  workStartDate$ = this.store.select(selectWorkStartDate);
-  totalWorkHoursDiff$ = this.store.select(selectTotalWorkHoursDiff);
-
   selectedWeek$: Observable<WeekIdentifier> = this.route.queryParams.pipe(
     map((params) => {
       const year = parseInt(params['year']);
@@ -95,21 +89,5 @@ export class DashboardPageComponent {
 
   getWeekDayIdentifier(week: WeekIdentifier, day: DayOfWeek) {
     return { week, weekDay: day } as WeekDayIdentifier;
-  }
-
-  setHoursPerDay(hours: string) {
-    this.store.dispatch(DataActions.setHoursPerDay({ hours: TimeRangeHelper.getHoursFromString(hours) }));
-  }
-
-  setWorkStartDate(date: string) {
-    this.store.dispatch(DataActions.setWorkStartDate({ date }));
-  }
-
-  resetData() {
-    if (!confirm('Are you sure you want to remove all data?')) {
-      return;
-    }
-
-    this.store.dispatch(DataActions.resetData());
   }
 }

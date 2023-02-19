@@ -12,6 +12,12 @@ export const AppRoutes: Route[] = [
         component: DashboardPageComponent,
       },
 
+      {
+        path: 'settings',
+        loadComponent: () =>
+          import('./pages/settings-page/settings-page.component').then((m) => m.SettingsPageComponent),
+      },
+
       { path: '**', redirectTo: '/dashboard' },
     ],
   },

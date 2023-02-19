@@ -1,19 +1,22 @@
 <ng-container
     *ngIf="{
         week: selectedWeek$ | async,
-        data: currentWeekData$ | async,
-        hoursPerDay: hoursPerDay$ | async,
-        workStartDate: workStartDate$ | async,
-        totalWorkHoursDiff: totalWorkHoursDiff$ | async
+        data: currentWeekData$ | async
     } as vm"
 >
     <div class="week-selector">
-        <button (click)="nextWeek(vm.week!, -1)" data-color="primary"><i class="fa-solid fa-arrow-left"></i></button>
+        <button appButton (click)="nextWeek(vm.week!, -1)" data-color="primary">
+            <i class="fa-solid fa-arrow-left"></i>
+        </button>
         <span
             >Week <strong>{{ (vm.week!.weekNumber | number : '2.0') + ', ' + vm.week!.year }}</strong></span
         >
-        <button (click)="nextWeek(vm.week!, 1)" data-color="primary"><i class="fa-solid fa-arrow-right"></i></button>
-        <button (click)="goToThisWeek()" data-color="primary"><i class="fa-solid fa-calendar-week"></i></button>
+        <button appButton (click)="nextWeek(vm.week!, 1)" data-color="primary">
+            <i class="fa-solid fa-arrow-right"></i>
+        </button>
+        <button appButton (click)="goToThisWeek()" data-color="primary">
+            <i class="fa-solid fa-calendar-week"></i>
+        </button>
     </div>
 
     <div class="week">
@@ -23,38 +26,4 @@
             [workEntry]="vm.data?.entries?.[day] || null"
         ></app-week-day-card>
     </div>
-
-    <app-card class="summary">
-        <h2>Summary</h2>
-
-        <div class="total-work-diff">
-            <span>Total work hours diff</span>
-            <span [class.reached]="(vm.totalWorkHoursDiff || 0) >= 0">{{ vm.totalWorkHoursDiff | hours : true }}</span>
-        </div>
-
-        <label>
-            Work hours per day
-            <input
-                type="time"
-                [value]="vm.hoursPerDay | hours"
-                (change)="setHoursPerDay(hoursPerDayInput.value)"
-                #hoursPerDayInput
-            />
-        </label>
-
-        <label>
-            Work start date
-            <input
-                type="date"
-                [value]="vm.workStartDate"
-                (change)="setWorkStartDate(workStartDateInput.value)"
-                #workStartDateInput
-            />
-        </label>
-
-        <button (click)="resetData()" class="reset-button">
-            <i class="fa-solid fa-user-xmark"></i>
-            Reset data
-        </button>
-    </app-card>
 </ng-container>

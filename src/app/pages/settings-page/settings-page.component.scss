@@ -1,0 +1,47 @@
+@use 'variables' as *;
+
+:host {
+  display: block;
+
+  text-align: center;
+}
+
+app-card {
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
+  align-items: center;
+
+  width: 30em;
+  max-width: 100%;
+  margin: 0 auto;
+  margin-top: 2em;
+  padding: 1em 4em;
+
+  h3 {
+    margin-top: 0;
+  }
+}
+
+input[type='time'] {
+  width: 8em;
+}
+
+label {
+  text-align: center;
+  color: rgba($foreground, 0.5);
+  font-weight: lighter;
+}
+
+label input {
+  color: $foreground;
+
+  display: block;
+  margin: 0 auto;
+  margin-top: 0.5em;
+}
+
+.reset-button {
+  margin-top: 2em;
+}
+

@@ -22,13 +22,14 @@ html {
   box-sizing: border-box;
 }
 
-button {
+[appButton] {
   background: lighten($background, 1%);
   color: $primary-text;
   border: none;
   padding: 0.5em 1em;
   border-radius: 0.25em;
   text-align: center;
+  font-size: 0.75em;
 
   cursor: pointer;
 
@@ -74,6 +75,25 @@ button {
     cursor: default;
     opacity: 0.5;
     filter: grayscale(1);
+  }
+}
+
+[appDateTimeInput] {
+  text-align: center;
+
+  background: rgba(0, 0, 0, 0.2);
+  color: inherit;
+  border: none;
+  font-family: inherit;
+
+  padding: 0.25em;
+  border-radius: 1em;
+
+  transition: background 0.2s;
+  cursor: text;
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.5);
   }
 }
 

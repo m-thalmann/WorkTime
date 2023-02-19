@@ -14,7 +14,7 @@
         *ngIf="isAddingPause"
     ></app-week-day-card-pause>
 
-    <button (click)="isAddingPause = true" [disabled]="isAddingPause" data-color="primary">
+    <button appButton (click)="isAddingPause = true" [disabled]="isAddingPause" data-color="primary">
         <i class="fa-solid fa-plus"></i> Pause
     </button>
 </div>

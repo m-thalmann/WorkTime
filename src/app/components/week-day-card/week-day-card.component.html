@@ -23,7 +23,13 @@
 
                     <div class="times">
                         <app-week-day-card-time-input-wrapper>
-                            <input type="time" [(ngModel)]="workDayStart" class="start-input" />
+                            <input
+                                appDateTimeInput
+                                type="time"
+                                [(ngModel)]="workDayStart"
+                                (change)="updateWorkDayEntry()"
+                                class="start-input"
+                            />
                         </app-week-day-card-time-input-wrapper>
 
                         <app-week-day-card-pauses
@@ -32,7 +38,13 @@
                         ></app-week-day-card-pauses>
 
                         <app-week-day-card-time-input-wrapper>
-                            <input type="time" [(ngModel)]="workDayEnd" class="end-input" />
+                            <input
+                                appDateTimeInput
+                                type="time"
+                                [(ngModel)]="workDayEnd"
+                                (change)="updateWorkDayEntry()"
+                                class="end-input"
+                            />
                         </app-week-day-card-time-input-wrapper>
                     </div>
                 </ng-container>
@@ -45,12 +57,7 @@
                 </ng-template>
 
                 <div class="buttons">
-                    <button (click)="updateWorkDayEntry()" data-color="primary" *ngIf="hasChanges">
-                        <i class="fa-solid fa-check"></i>
-                        Save changes
-                    </button>
-
-                    <button (click)="removeWorkEntry()">
+                    <button appButton (click)="removeWorkEntry()">
                         <i class="fa-solid fa-calendar-xmark"></i>
                         Clear entry
                     </button>
@@ -60,10 +67,10 @@
             <ng-template #noEntry>
                 <div class="no-entry">
                     <ng-container *ngIf="!isDayInFuture; else futureEntry">
-                        <button (click)="addWorkDayEntry()" data-color="primary">
+                        <button appButton (click)="addWorkDayEntry()" data-color="primary">
                             <i class="fa-solid fa-calendar-plus"></i> Add entry
                         </button>
-                        <button (click)="addHolidayEntry()">
+                        <button appButton (click)="addHolidayEntry()">
                             <i class="fa-solid fa-calendar-minus"></i> Add holiday entry
                         </button>
                     </ng-container>

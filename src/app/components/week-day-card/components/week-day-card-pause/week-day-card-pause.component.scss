@@ -1,9 +1,7 @@
 @use 'variables' as *;
-@use 'element-mixins';
 
 input[type='time'],
 input[type='date'] {
-  @include element-mixins.dateOrTimeInput();
   width: 100%;
 }
 

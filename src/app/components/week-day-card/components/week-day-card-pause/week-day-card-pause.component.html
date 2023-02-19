@@ -1,16 +1,16 @@
 <app-week-day-card-time-input-wrapper>
-    <input type="time" [(ngModel)]="pauseStart" class="pause-start-input" />
+    <input appDateTimeInput type="time" [(ngModel)]="pauseStart" class="pause-start-input" />
 </app-week-day-card-time-input-wrapper>
 <app-week-day-card-time-input-wrapper>
-    <input type="time" [(ngModel)]="pauseEnd" class="pause-end-input" />
+    <input appDateTimeInput type="time" [(ngModel)]="pauseEnd" class="pause-end-input" />
 </app-week-day-card-time-input-wrapper>
 
 <div class="buttons">
-    <button (click)="saveEntry()" class="accept-button" data-color="primary" *ngIf="hasChanges">
+    <button appButton (click)="saveEntry()" class="accept-button" data-color="primary" *ngIf="hasChanges">
         <i class="fa-solid fa-check"></i>
     </button>
 
-    <button (click)="removeEntry()" class="delete-button" data-color="warn">
+    <button appButton (click)="removeEntry()" class="delete-button" data-color="warn">
         <i class="fa-solid fa-minus"></i>
     </button>
 </div>

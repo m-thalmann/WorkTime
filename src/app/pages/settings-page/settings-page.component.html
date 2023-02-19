@@ -1,0 +1,44 @@
+<div *ngIf="{ hoursPerDay: hoursPerDay$ | async, workStartDate: workStartDate$ | async } as vm">
+    <h2>
+        <i class="fa-solid fa-gear"></i>
+        Settings
+    </h2>
+
+    <app-card>
+        <h3><i class="fa-solid fa-wrench"></i> General</h3>
+
+        <label>
+            Work hours per day
+            <input
+                appDateTimeInput
+                type="time"
+                [value]="vm.hoursPerDay | hours"
+                (change)="setHoursPerDay(hoursPerDayInput.value)"
+                #hoursPerDayInput
+            />
+        </label>
+
+        <label>
+            Work start date
+            <input
+                appDateTimeInput
+                type="date"
+                [value]="vm.workStartDate"
+                (change)="setWorkStartDate(workStartDateInput.value)"
+                #workStartDateInput
+            />
+        </label>
+
+        <button appButton (click)="resetData()" class="reset-button" data-color="warn">
+            <i class="fa-solid fa-user-xmark"></i>
+            Reset data
+        </button>
+    </app-card>
+
+    <app-card>
+        <h3><i class="fa-solid fa-rotate"></i> Sync</h3>
+
+        <i>Coming soon...</i>
+    </app-card>
+</div>
+

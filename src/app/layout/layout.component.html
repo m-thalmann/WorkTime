@@ -1,6 +1,22 @@
-<header>
-    <img src="/assets/images/icon.png" />
-    <h1>WorkTime</h1>
+<header *ngIf="{ totalWorkHoursDiff: totalWorkHoursDiff$ | async } as vm">
+    <a appButton routerLink="/settings" routerLinkActive="hidden" class="nav-button">
+        <i class="fa-solid fa-gear"></i>
+    </a>
+    <a appButton routerLink="/dashboard" routerLinkActive="hidden" class="nav-button">
+        <i class="fa-solid fa-home"></i>
+    </a>
+
+    <div class="title">
+        <img src="/assets/images/icon.png" />
+
+        <h1>WorkTime</h1>
+
+        <div class="total-work-diff" [class.reached]="(vm.totalWorkHoursDiff || 0) >= 0">
+            {{ vm.totalWorkHoursDiff | hours : true }}
+        </div>
+    </div>
+
+    <button appButton class="sync-button" disabled><i class="fa-solid fa-rotate"></i></button>
 </header>
 
 <main>
