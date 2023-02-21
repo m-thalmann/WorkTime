@@ -17,7 +17,10 @@
             </div>
         </div>
 
-        <button appButton class="sync-button" disabled><i class="fa-solid fa-rotate"></i></button>
+        <div class="sync-buttons">
+            <button appButton (click)="importExport.exportData()"><i class="fa-solid fa-download"></i></button>
+            <button appButton (click)="importExport.importData()"><i class="fa-solid fa-upload"></i></button>
+        </div>
     </div>
 </header>
 

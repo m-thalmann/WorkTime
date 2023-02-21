@@ -56,6 +56,12 @@ header {
         }
       }
     }
+
+    .sync-buttons {
+      display: flex;
+      gap: 0.5em;
+      justify-content: right;
+    }
   }
 }
 

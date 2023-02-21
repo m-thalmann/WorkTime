@@ -13,6 +13,11 @@ export const DataActions = createActionGroup({
       hoursPerDay: DataState['hoursPerDay'];
       workStartDate: DataState['workStartDate'];
     }>(),
+    'Import data': props<{
+      workWeeks: DataState['workWeeks'];
+      hoursPerDay: DataState['hoursPerDay'];
+      workStartDate: DataState['workStartDate'];
+    }>(),
 
     'Reset data': emptyProps(),
 

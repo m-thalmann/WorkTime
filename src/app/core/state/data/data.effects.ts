@@ -31,6 +31,7 @@ export class DataEffects {
     () =>
       this.actions$.pipe(
         ofType(
+          DataActions.importData,
           DataActions.resetData,
           DataActions.setWorkStartDate,
           DataActions.setHoursPerDay,
