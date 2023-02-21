@@ -27,7 +27,7 @@
                                 appDateTimeInput
                                 type="time"
                                 [(ngModel)]="workDayStart"
-                                (change)="updateWorkDayEntry()"
+                                (blur)="updateWorkDayEntry()"
                                 class="start-input"
                             />
                         </app-week-day-card-time-input-wrapper>
@@ -42,7 +42,7 @@
                                 appDateTimeInput
                                 type="time"
                                 [(ngModel)]="workDayEnd"
-                                (change)="updateWorkDayEntry()"
+                                (blur)="updateWorkDayEntry()"
                                 class="end-input"
                             />
                         </app-week-day-card-time-input-wrapper>
