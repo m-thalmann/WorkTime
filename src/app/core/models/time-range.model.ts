@@ -34,6 +34,6 @@ export class TimeRangeHelper {
   }
 
   static getHoursDiff(range: TimeRange) {
-    return range.endHours - range.startHours;
+    return (range.endHours * 1000 - range.startHours * 1000) / 1000;
   }
 }
