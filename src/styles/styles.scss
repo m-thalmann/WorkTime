@@ -78,11 +78,11 @@ html {
   }
 }
 
-[appDateTimeInput] {
+[appInput] {
   text-align: center;
 
   background: rgba(0, 0, 0, 0.2);
-  color: inherit;
+  color: $foreground;
   border: none;
   font-family: inherit;
 

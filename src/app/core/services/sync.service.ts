@@ -14,6 +14,8 @@ export class SyncService {
   private syncSettings$ = this.store.select(selectSyncInfo).pipe(map((s) => s?.settings));
   private syncHistory$ = this.store.select(selectSyncInfo).pipe(map((s) => s?.history));
 
+  isSyncEnabled$ = this.syncSettings$.pipe(map((s) => !!s));
+
   constructor(private store: Store, private http: HttpClient) {}
 
   get isSupported() {

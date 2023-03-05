@@ -1,4 +1,4 @@
-<header *ngIf="{ totalWorkHoursDiff: totalWorkHoursDiff$ | async } as vm">
+<header *ngIf="{ totalWorkHoursDiff: totalWorkHoursDiff$ | async, syncEnabled: sync.isSyncEnabled$ | async } as vm">
     <div class="header-content">
         <a appButton routerLink="/settings" routerLinkActive="hidden" class="nav-button">
             <i class="fa-solid fa-gear"></i>
@@ -18,8 +18,15 @@
         </div>
 
         <div class="sync-buttons">
-            <button appButton (click)="importExport.exportData()"><i class="fa-solid fa-download"></i></button>
-            <button appButton (click)="importExport.importData()"><i class="fa-solid fa-upload"></i></button>
+            <ng-container *ngIf="vm.syncEnabled">
+                <!-- TODO: feedback on click -->
+                <button appButton (click)="sync.sync()"><i class="fa-solid fa-sync"></i></button>
+            </ng-container>
+
+            <ng-container *ngIf="!vm.syncEnabled">
+                <button appButton (click)="importExport.exportData()"><i class="fa-solid fa-download"></i></button>
+                <button appButton (click)="importExport.importData()"><i class="fa-solid fa-upload"></i></button>
+            </ng-container>
         </div>
     </div>
 </header>
