@@ -1,5 +1,6 @@
 import { createActionGroup, emptyProps, props } from '@ngrx/store';
 import { DayOfWeek } from '../../models/day-of-week.model';
+import { SyncSettings } from '../../models/sync-settings.model';
 import { WeekIdentifier } from '../../models/week-identifier.model';
 import { WorkDayEntry, WorkEntry } from '../../models/work-entry.model';
 import { DataState } from './data.state';
@@ -12,6 +13,7 @@ export const DataActions = createActionGroup({
       workWeeks: DataState['workWeeks'];
       hoursPerDay: DataState['hoursPerDay'];
       workStartDate: DataState['workStartDate'];
+      syncInfo: DataState['syncInfo'];
     }>(),
     'Import data': props<{
       workWeeks: DataState['workWeeks'];
@@ -23,6 +25,10 @@ export const DataActions = createActionGroup({
 
     'Set hours per day': props<{ hours: number }>(),
     'Set work start date': props<{ date: string }>(),
+
+    'Set sync settings': props<{ settings: SyncSettings }>(),
+    'Set sync history': props<{ history: string[] }>(),
+    'Reset sync': emptyProps(),
   },
 });
 

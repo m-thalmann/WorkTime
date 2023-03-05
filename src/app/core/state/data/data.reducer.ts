@@ -15,8 +15,8 @@ export const dataReducer = createReducer(
 
   on(DataActions.loadData, (state) => ({ ...state, loaded: false })),
 
-  on(DataActions.loadDataSuccess, (state, { workWeeks, hoursPerDay, workStartDate }) => {
-    return { ...state, workWeeks, hoursPerDay, workStartDate, loaded: true };
+  on(DataActions.loadDataSuccess, (state, { workWeeks, hoursPerDay, workStartDate, syncInfo }) => {
+    return { ...state, workWeeks, hoursPerDay, workStartDate, syncInfo, loaded: true };
   }),
 
   on(DataActions.importData, (state, { workWeeks, hoursPerDay, workStartDate }) => {
@@ -33,6 +33,34 @@ export const dataReducer = createReducer(
 
   on(DataActions.setWorkStartDate, (state, { date }) => {
     return { ...state, workStartDate: date };
+  }),
+
+  on(DataActions.setSyncSettings, (state, { settings }) => {
+    const newState = { ...state };
+
+    if (!state.syncInfo) {
+      newState.syncInfo = { settings, history: [] };
+    } else {
+      newState.syncInfo = { ...state.syncInfo, settings };
+    }
+
+    return newState;
+  }),
+
+  on(DataActions.setSyncHistory, (state, { history }) => {
+    const newState = { ...state };
+
+    if (!state.syncInfo) {
+      throw new Error('Cannot set sync history when sync is set up');
+    }
+
+    newState.syncInfo = { ...state.syncInfo, history };
+
+    return newState;
+  }),
+
+  on(DataActions.resetSync, (state) => {
+    return { ...state, syncInfo: undefined };
   }),
 
   /*

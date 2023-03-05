@@ -3,13 +3,20 @@ import DateHelpers from '../../helpers/DateHelpers';
 import { DayOfWeek, DaysOfWeek } from '../../models/day-of-week.model';
 import { WeekIdentifierHelper } from '../../models/week-identifier.model';
 import { isWorkDayEntry, WorkEntryHelper } from '../../models/work-entry.model';
-import { DataState } from './data.state';
+import { DataState, SyncDataState } from './data.state';
 
 export const selectData = createFeatureSelector<DataState>('data');
 
 export const selectWorkWeeks = createSelector(selectData, (state: DataState) => state.workWeeks);
 export const selectHoursPerDay = createSelector(selectData, (state: DataState) => state.hoursPerDay);
 export const selectWorkStartDate = createSelector(selectData, (state: DataState) => state.workStartDate);
+export const selectSyncInfo = createSelector(selectData, (state: DataState) => state.syncInfo);
+
+export const selectSyncData = createSelector(selectData, (state: DataState) => {
+  const { workWeeks, hoursPerDay, workStartDate } = state;
+
+  return { workWeeks, hoursPerDay, workStartDate } as SyncDataState;
+});
 
 export const selectTotalWorkHoursDiff = createSelector(selectData, (state: DataState) => {
   const today = new Date();

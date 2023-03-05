@@ -1,12 +1,14 @@
 import DateHelpers from '../../helpers/DateHelpers';
+import { SyncSettings } from '../../models/sync-settings.model';
 import { WorkWeek } from '../../models/work-week.model';
 
 export const DataStateStorageKey = 'APP_DATA_STATE';
 
-export interface DataState {
-  workWeeks: { [key: string]: WorkWeek };
-  hoursPerDay: number;
-  workStartDate: string;
+export interface DataState extends SyncDataState {
+  syncInfo?: {
+    settings: SyncSettings;
+    history: string[];
+  };
   loaded: boolean;
 }
 
@@ -16,3 +18,9 @@ export const InitialDataState: DataState = {
   workStartDate: DateHelpers.getDateString(new Date()),
   loaded: false,
 };
+
+export interface SyncDataState {
+  workWeeks: { [key: string]: WorkWeek };
+  hoursPerDay: number;
+  workStartDate: string;
+}

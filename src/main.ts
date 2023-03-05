@@ -1,4 +1,5 @@
 import { enableProdMode } from '@angular/core';
+import { provideHttpClient } from '@angular/common/http';
 import { bootstrapApplication } from '@angular/platform-browser';
 import { provideRouter } from '@angular/router';
 import { provideEffects } from '@ngrx/effects';
@@ -15,5 +16,10 @@ if (environment.production) {
 }
 
 bootstrapApplication(AppComponent, {
-  providers: [provideRouter(AppRoutes), provideStore({ data: dataReducer }), provideEffects([DataEffects])],
+  providers: [
+    provideRouter(AppRoutes),
+    provideStore({ data: dataReducer }),
+    provideEffects([DataEffects]),
+    provideHttpClient(),
+  ],
 }).catch((err) => console.error(err));
