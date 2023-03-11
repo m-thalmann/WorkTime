@@ -165,5 +165,16 @@ export class SettingsPageComponent {
 
     this.syncSettingsSavedIndicatorEvent$.emit();
   }
+
+  async pullSync() {
+    await this.sync.pullSync();
+
+    alert('Sync successful!');
+  }
+  async pushSync() {
+    await this.sync.pushSync();
+
+    alert('Sync successful!');
+  }
 }
 

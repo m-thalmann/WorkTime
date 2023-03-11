@@ -6,6 +6,10 @@
   text-align: center;
 }
 
+h2 {
+  margin-top: 0;
+}
+
 app-card {
   display: flex;
   flex-direction: column;
@@ -76,6 +80,11 @@ app-card {
       input[type='submit'] {
         margin-top: 2em;
       }
+    }
+
+    .force-sync-buttons {
+      display: flex;
+      gap: 1em;
     }
   }
 

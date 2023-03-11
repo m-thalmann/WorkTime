@@ -1,8 +1,8 @@
 import { HttpClient, HttpRequest, HttpResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { catchError, filter, lastValueFrom, map, Observable, of, shareReplay, take, tap } from 'rxjs';
-import { SyncData } from '../models/sync-data.model';
+import { BehaviorSubject, catchError, filter, lastValueFrom, map, Observable, of, shareReplay, take } from 'rxjs';
+import { SyncData, SyncResult } from '../models/sync-data.model';
 import { isSyncTokenAuth } from '../models/sync-settings.model';
 import { DataActions } from '../state/data/data.actions';
 import { selectSyncData, selectSyncInfo } from '../state/data/data.selectors';
@@ -15,6 +15,9 @@ export class SyncService {
   private syncHistory$ = this.store.select(selectSyncInfo).pipe(map((s) => s?.history));
 
   isSyncEnabled$ = this.syncSettings$.pipe(map((s) => !!s));
+
+  private _isSyncing$ = new BehaviorSubject(false);
+  isSyncing$ = this._isSyncing$.asObservable();
 
   constructor(private store: Store, private http: HttpClient) {}
 
@@ -94,71 +97,149 @@ export class SyncService {
     await this.makeRequest(request);
   }
 
-  async sync() {
-    const remoteSyncData = await this.getData();
-    const localData = await lastValueFrom(this.store.select(selectSyncData).pipe(take(1)));
-
-    const localDataHash = await this.hashData(JSON.stringify(localData));
-
-    const localHistory = Array.from((await lastValueFrom(this.syncHistory$.pipe(take(1)))) || []);
-
-    if (localHistory[localHistory.length - 1] !== localDataHash) {
-      localHistory.push(localDataHash);
+  async pushSync() {
+    if (this._isSyncing$.value) {
+      throw new Error('Already syncing');
     }
 
-    let localHistoryUpdate: string[] | null = null;
+    this._isSyncing$.next(true);
 
-    if (remoteSyncData) {
+    try {
+      const localData = await lastValueFrom(this.store.select(selectSyncData).pipe(take(1)));
+
+      const localDataHash = await this.hashData(JSON.stringify(localData));
+
+      const localHistory = Array.from((await lastValueFrom(this.syncHistory$.pipe(take(1)))) || []);
+
+      if (localHistory[localHistory.length - 1] !== localDataHash) {
+        localHistory.push(localDataHash);
+      }
+
+      await this.updateData({ data: localData, history: localHistory });
+
+      this.store.dispatch(DataActions.setSyncHistory({ history: localHistory }));
+
+      this._isSyncing$.next(false);
+    } catch (e) {
+      this.log('Error:', e);
+      this._isSyncing$.next(false);
+      throw e;
+    }
+  }
+
+  async pullSync() {
+    if (this._isSyncing$.value) {
+      throw new Error('Already syncing');
+    }
+
+    this._isSyncing$.next(true);
+
+    try {
+      const remoteSyncData = await this.getData();
+
+      if (!remoteSyncData) {
+        return;
+      }
+
       const remoteHistory = remoteSyncData.history;
 
-      const lastLocalHistory = localHistory[localHistory.length - 1];
-      const lastRemoteHistory = remoteHistory[remoteHistory.length - 1];
+      this.store.dispatch(DataActions.importData({ ...remoteSyncData.data }));
+      this.store.dispatch(DataActions.setSyncHistory({ history: remoteHistory }));
 
-      if (lastLocalHistory === lastRemoteHistory) {
-        // no update needed
+      this._isSyncing$.next(false);
+    } catch (e) {
+      this.log('Error:', e);
+      this._isSyncing$.next(false);
+      throw e;
+    }
+  }
 
-        localHistoryUpdate = localHistory;
+  async sync(): Promise<SyncResult> {
+    if (this._isSyncing$.value) {
+      throw new Error('Already syncing');
+    }
 
-        this.log('No update needed');
-      } else if (remoteHistory.includes(lastLocalHistory)) {
-        // update to local
+    this._isSyncing$.next(true);
 
-        localHistoryUpdate = remoteHistory;
+    try {
+      const remoteSyncData = await this.getData();
+      const localData = await lastValueFrom(this.store.select(selectSyncData).pipe(take(1)));
 
-        this.store.dispatch(DataActions.importData({ ...remoteSyncData.data }));
+      const localDataHash = await this.hashData(JSON.stringify(localData));
 
-        this.log('Local updated');
-      } else if (localHistory.includes(lastRemoteHistory)) {
-        // update to remote
+      const localHistory = Array.from((await lastValueFrom(this.syncHistory$.pipe(take(1)))) || []);
+
+      if (localHistory[localHistory.length - 1] !== localDataHash) {
+        localHistory.push(localDataHash);
+      }
+
+      let localHistoryUpdate: string[] | null = null;
+
+      let result = SyncResult.NoUpdate;
+
+      if (remoteSyncData) {
+        const remoteHistory = remoteSyncData.history;
+
+        const lastLocalHistory = localHistory[localHistory.length - 1];
+        const lastRemoteHistory = remoteHistory[remoteHistory.length - 1];
+
+        if (lastLocalHistory === lastRemoteHistory) {
+          // no update needed
+
+          localHistoryUpdate = localHistory;
+
+          this.log('No update needed');
+        } else if (remoteHistory.includes(lastLocalHistory)) {
+          // update to local
+
+          localHistoryUpdate = remoteHistory;
+
+          this.store.dispatch(DataActions.importData({ ...remoteSyncData.data }));
+
+          this.log('Local updated');
+
+          result = SyncResult.LocalUpdated;
+        } else if (localHistory.includes(lastRemoteHistory)) {
+          // update to remote
+
+          localHistoryUpdate = localHistory;
+
+          await this.updateData({ data: localData, history: localHistory });
+
+          this.log('Remote updated');
+
+          result = SyncResult.RemoteUpdated;
+        } else {
+          // conflict
+
+          this.log('Conflict');
+
+          result = SyncResult.Conflict;
+        }
+      } else {
+        // no remote data
 
         localHistoryUpdate = localHistory;
 
         await this.updateData({ data: localData, history: localHistory });
 
         this.log('Remote updated');
-      } else {
-        // conflict
 
-        this.log('Conflict');
-
-        // TODO: handle conflict
-        return false;
+        result = SyncResult.RemoteUpdated;
       }
-    } else {
-      // no remote data
 
-      localHistoryUpdate = localHistory;
+      if (localHistoryUpdate) {
+        this.store.dispatch(DataActions.setSyncHistory({ history: localHistoryUpdate }));
+      }
 
-      await this.updateData({ data: localData, history: localHistory });
+      this._isSyncing$.next(false);
 
-      this.log('Remote updated');
+      return result;
+    } catch (e) {
+      this.log('Error:', e);
+      this._isSyncing$.next(false);
+      throw e;
     }
-
-    if (localHistoryUpdate) {
-      this.store.dispatch(DataActions.setSyncHistory({ history: localHistoryUpdate }));
-    }
-
-    return true;
   }
 
   private log(...message: any) {

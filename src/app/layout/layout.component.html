@@ -1,4 +1,11 @@
-<header *ngIf="{ totalWorkHoursDiff: totalWorkHoursDiff$ | async, syncEnabled: sync.isSyncEnabled$ | async } as vm">
+<header
+    *ngIf="{
+        totalWorkHoursDiff: totalWorkHoursDiff$ | async,
+        syncEnabled: sync.isSyncEnabled$ | async,
+        isSyncing: sync.isSyncing$ | async,
+        syncIcon: syncIcon$ | async
+    } as vm"
+>
     <div class="header-content">
         <a appButton routerLink="/settings" routerLinkActive="hidden" class="nav-button">
             <i class="fa-solid fa-gear"></i>
@@ -19,8 +26,9 @@
 
         <div class="sync-buttons">
             <ng-container *ngIf="vm.syncEnabled">
-                <!-- TODO: feedback on click -->
-                <button appButton (click)="sync.sync()"><i class="fa-solid fa-sync"></i></button>
+                <button appButton (click)="syncData()" [disabled]="vm.isSyncing">
+                    <i [class]="'fa-solid ' + vm.syncIcon" [class.animation-rotate]="vm.isSyncing"></i>
+                </button>
             </ng-container>
 
             <ng-container *ngIf="!vm.syncEnabled">

@@ -1,8 +1,10 @@
 <div
+    class="container"
     *ngIf="{
         hoursPerDay: hoursPerDay$ | async,
         workStartDate: workStartDate$ | async,
-        syncSettingsSavedIndicator: syncSettingsSavedIndicator$ | async
+        syncSettingsSavedIndicator: syncSettingsSavedIndicator$ | async,
+        isSyncing: sync.isSyncing$ | async
     } as vm"
 >
     <h2>
@@ -129,9 +131,18 @@
                 type="submit"
                 [value]="vm.syncSettingsSavedIndicator ? '✔' : 'Save settings'"
                 appButton
-                [disabled]="!syncSettingsForm.valid"
+                [disabled]="!syncSettingsForm.valid || vm.isSyncing"
             />
         </form>
+
+        <div class="force-sync-buttons">
+            <button appButton (click)="pullSync()" [disabled]="vm.isSyncing">
+                <i class="fa-solid fa-download"></i> Force pull
+            </button>
+            <button appButton (click)="pushSync()" [disabled]="vm.isSyncing">
+                <i class="fa-solid fa-upload"></i> Force push
+            </button>
+        </div>
 
         <p class="fg-warn" *ngIf="!sync.isSupported">Syncing is not supported in your browser!</p>
     </app-card>
