@@ -112,3 +112,37 @@ label input {
   margin-top: 2em;
 }
 
+@media screen and (max-width: $mobile-breakpoint) {
+  button,
+  input[type='submit'] {
+    width: max-content !important;
+  }
+
+  app-card {
+    &.sync-settings {
+      form {
+        gap: 1em;
+
+        input[type='submit'] {
+          margin: 0 auto;
+        }
+
+        label {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 0.25em;
+
+          input[type='checkbox'] {
+            margin: 0;
+          }
+
+          select,
+          input:not([type='checkbox']) {
+            width: 100%;
+          }
+        }
+      }
+    }
+  }
+}
+

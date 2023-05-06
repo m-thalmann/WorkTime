@@ -6,6 +6,10 @@
   display: grid;
   grid-template-rows: auto 1fr;
   overflow: hidden;
+
+  > * {
+    min-width: 0;
+  }
 }
 
 header {
@@ -85,6 +89,16 @@ header > .header-content {
   margin: 0 auto;
   padding-left: $main-padding;
   padding-right: $main-padding;
+}
+
+@media screen and (max-width: $mobile-breakpoint) {
+  header .header-content {
+    gap: 0.5em;
+
+    h1 {
+      display: none;
+    }
+  }
 }
 
 @keyframes rotate {
