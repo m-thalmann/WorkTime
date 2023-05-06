@@ -109,6 +109,10 @@ export class WeekDayCardComponent implements OnChanges {
     return this.workEntry !== null ? WorkEntryHelper.getWorkHours(this.workEntry) : 0;
   }
 
+  getDiffHours(hoursPerDay: number | null) {
+    return TimeRangeHelper.getHoursDiff({ startHours: this.workHours, endHours: hoursPerDay || 0 });
+  }
+
   get isDayToday() {
     return DateHelpers.isToday(this.date);
   }

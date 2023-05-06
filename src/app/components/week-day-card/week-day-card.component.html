@@ -13,7 +13,7 @@
                             {{ workHours | hours }}
                         </div>
 
-                        <ng-container *ngIf="{ data: workHours - (vm.hoursPerDay || 0) } as dayDiff">
+                        <ng-container *ngIf="{ data: getDiffHours(vm.hoursPerDay) } as dayDiff">
                             <div class="day-work-time-diff" [class.reached]="dayDiff.data >= 0">
                                 <i class="fa-solid fa-hourglass"></i>
                                 {{ dayDiff.data | hours : true }}
