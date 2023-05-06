@@ -19,7 +19,7 @@
 
             <h1>WorkTime</h1>
 
-            <div class="total-work-diff" [class.reached]="(vm.totalWorkHoursDiff || 0) >= 0">
+            <div class="total-work-diff" [class.reached]="isReached(vm.totalWorkHoursDiff || 0)">
                 {{ vm.totalWorkHoursDiff | hours : true }}
             </div>
         </div>

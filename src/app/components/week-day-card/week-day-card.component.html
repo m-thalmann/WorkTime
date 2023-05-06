@@ -14,7 +14,7 @@
                         </div>
 
                         <ng-container *ngIf="{ data: getDiffHours(vm.hoursPerDay) } as dayDiff">
-                            <div class="day-work-time-diff" [class.reached]="dayDiff.data >= 0">
+                            <div class="day-work-time-diff" [class.reached]="isReached(dayDiff.data)">
                                 <i class="fa-solid fa-hourglass"></i>
                                 {{ dayDiff.data | hours : true }}
                             </div>

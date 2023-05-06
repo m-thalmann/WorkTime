@@ -110,7 +110,7 @@ export class WeekDayCardComponent implements OnChanges {
   }
 
   getDiffHours(hoursPerDay: number | null) {
-    return TimeRangeHelper.getHoursDiff({ startHours: this.workHours, endHours: hoursPerDay || 0 });
+    return TimeRangeHelper.getHoursDiff({ startHours: hoursPerDay || 0, endHours: this.workHours });
   }
 
   get isDayToday() {
@@ -119,6 +119,10 @@ export class WeekDayCardComponent implements OnChanges {
 
   get isDayInFuture() {
     return DateHelpers.isInFuture(this.date);
+  }
+
+  isReached(hours: number) {
+    return Math.round(hours * 60) >= 0;
   }
 
   addWorkDayEntry() {

@@ -11,6 +11,8 @@ This tool enables you to enter and keep track of your worked times for each day.
 - Adding holiday entries
 - Setting the work-start-day & amount of targeted work-hours per day
 - Summary of the total missing / overtime hours
+- Importing / Exporting save-files
+- Syncing of save-files
 
 ## Deploying
 

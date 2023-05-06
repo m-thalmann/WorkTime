@@ -4,6 +4,7 @@ import { DayOfWeek, DaysOfWeek } from '../../models/day-of-week.model';
 import { WeekIdentifierHelper } from '../../models/week-identifier.model';
 import { isWorkDayEntry, WorkEntryHelper } from '../../models/work-entry.model';
 import { DataState, SyncDataState } from './data.state';
+import { TimeRangeHelper } from '../../models/time-range.model';
 
 export const selectData = createFeatureSelector<DataState>('data');
 
@@ -79,5 +80,5 @@ export const selectTotalWorkHoursDiff = createSelector(selectData, (state: DataS
     );
   }, 0);
 
-  return workedHours - requiredHours;
+  return TimeRangeHelper.getHoursDiff({ startHours: requiredHours, endHours: workedHours });
 });

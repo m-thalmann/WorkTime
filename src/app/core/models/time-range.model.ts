@@ -3,6 +3,8 @@ export interface TimeRange {
   endHours: number;
 }
 
+const ROUND_MULTIPLIER = 1000;
+
 export class TimeRangeHelper {
   static fromTime(start: string, end: string): TimeRange {
     const data = { startHours: this.getHoursFromString(start), endHours: this.getHoursFromString(end) };
@@ -19,7 +21,7 @@ export class TimeRangeHelper {
   static getHoursFromString(hourString: string) {
     const [hours, minutes] = hourString.split(':').map((v: string) => parseInt(v));
 
-    return hours + Math.round((minutes / 60) * 1000) / 1000;
+    return hours + Math.round((minutes / 60) * ROUND_MULTIPLIER) / ROUND_MULTIPLIER;
   }
 
   static getTimeString(totalHours: number) {
@@ -34,6 +36,6 @@ export class TimeRangeHelper {
   }
 
   static getHoursDiff(range: TimeRange) {
-    return Math.round(range.endHours * 1000 - range.startHours * 1000) / 1000;
+    return Math.round((range.endHours - range.startHours) * ROUND_MULTIPLIER) / ROUND_MULTIPLIER;
   }
 }

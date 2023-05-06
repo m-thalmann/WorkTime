@@ -53,10 +53,10 @@ export class WeekDayCardPauseComponent {
       return true;
     }
 
-    const newPauseStart = this.pauseStart !== null ? TimeRangeHelper.getHoursFromString(this.pauseStart) : null;
-    const newPauseEnd = this.pauseEnd !== null ? TimeRangeHelper.getHoursFromString(this.pauseEnd) : null;
+    const pauseStart = TimeRangeHelper.getTimeString(this._pause.startHours);
+    const pauseEnd = TimeRangeHelper.getTimeString(this._pause.endHours);
 
-    return this._pause.startHours !== newPauseStart || this._pause.endHours !== newPauseEnd;
+    return this.pauseStart !== pauseStart || this.pauseEnd !== pauseEnd;
   }
 
   get week() {
