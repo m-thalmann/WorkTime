@@ -1,7 +1,18 @@
-import { HttpClient, HttpRequest, HttpResponse } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpRequest, HttpResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { BehaviorSubject, catchError, filter, lastValueFrom, map, Observable, of, shareReplay, take } from 'rxjs';
+import {
+  BehaviorSubject,
+  catchError,
+  filter,
+  lastValueFrom,
+  map,
+  Observable,
+  of,
+  shareReplay,
+  take,
+  throwError,
+} from 'rxjs';
 import { SyncData, SyncResult } from '../models/sync-data.model';
 import { isSyncTokenAuth } from '../models/sync-settings.model';
 import { DataActions } from '../state/data/data.actions';
@@ -80,7 +91,13 @@ export class SyncService {
         ) as Observable<HttpResponse<T>>
       ).pipe(
         map((response: HttpResponse<T>) => response.body),
-        catchError((_) => of(null))
+        catchError((error: HttpErrorResponse) => {
+          if (error.status === 404) {
+            return of(null);
+          }
+
+          return throwError(() => error);
+        })
       )
     );
   }
@@ -138,6 +155,8 @@ export class SyncService {
       const remoteSyncData = await this.getData();
 
       if (!remoteSyncData) {
+        this._isSyncing$.next(false);
+
         return;
       }
 

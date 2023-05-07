@@ -34,12 +34,17 @@ export class LayoutComponent {
   constructor(private store: Store, public importExport: ImportExportService, public sync: SyncService) {}
 
   async syncData() {
-    const syncResult = await this.sync.sync();
+    try {
+      const syncResult = await this.sync.sync();
 
-    this.syncIcon$.next(syncResultIcons[syncResult]);
+      this.syncIcon$.next(syncResultIcons[syncResult]);
 
-    if (syncResult === SyncResult.Conflict) {
-      alert('Conflict detected. Please resolve the conflict in the settings by forcing a push or pull.');
+      if (syncResult === SyncResult.Conflict) {
+        alert('Conflict detected. Please resolve the conflict in the settings by forcing a push or pull.');
+      }
+    } catch (e) {
+      this.syncIcon$.next('fa-circle-exclamation');
+      alert('Sync failed!');
     }
 
     await new Promise((resolve) => setTimeout(resolve, 1000));

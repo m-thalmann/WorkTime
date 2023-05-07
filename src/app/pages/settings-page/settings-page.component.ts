@@ -167,14 +167,22 @@ export class SettingsPageComponent {
   }
 
   async pullSync() {
-    await this.sync.pullSync();
+    try {
+      await this.sync.pullSync();
 
-    alert('Sync successful!');
+      alert('Sync successful!');
+    } catch (e) {
+      alert('Sync failed!');
+    }
   }
   async pushSync() {
-    await this.sync.pushSync();
+    try {
+      await this.sync.pushSync();
 
-    alert('Sync successful!');
+      alert('Sync successful!');
+    } catch (e) {
+      alert('Sync failed!');
+    }
   }
 }
 
