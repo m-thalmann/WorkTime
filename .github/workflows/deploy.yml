@@ -27,7 +27,7 @@ jobs:
       - name: Build
         run: |
           npm i
-          npm run build -- --base-href /WorkTime
+          npm run build -- --base-href=/WorkTime/
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v1
         with:
