@@ -1,5 +1,15 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, Input, OnChanges, SimpleChanges } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  DestroyRef,
+  Input,
+  OnChanges,
+  OnInit,
+  SimpleChanges,
+  inject,
+} from '@angular/core';
 import { Store } from '@ngrx/store';
 import DateHelpers from 'src/app/core/helpers/DateHelpers';
 import { DaysOfWeek } from 'src/app/core/models/day-of-week.model';
@@ -20,6 +30,8 @@ import { WeekDayCardTimeInputWrapperComponent } from './components/week-day-card
 import { CardComponent } from '../card/card.component';
 import { TimeRangeHelper } from 'src/app/core/models/time-range.model';
 import { FormsModule } from '@angular/forms';
+import { interval, startWith, switchMap, timer } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-week-day-card',
@@ -36,7 +48,9 @@ import { FormsModule } from '@angular/forms';
     FormsModule,
   ],
 })
-export class WeekDayCardComponent implements OnChanges {
+export class WeekDayCardComponent implements OnInit, OnChanges {
+  private destroyRef = inject(DestroyRef);
+
   @Input() weekDayIdentifier!: WeekDayIdentifier;
   @Input() workEntry!: WorkEntry | null;
 
@@ -45,7 +59,21 @@ export class WeekDayCardComponent implements OnChanges {
 
   hoursPerDay$ = this.store.select(selectHoursPerDay);
 
-  constructor(private store: Store) {}
+  constructor(private store: Store, private changeDetectorRef: ChangeDetectorRef) {}
+
+  ngOnInit() {
+    const now = new Date();
+    const secondsUntilNextDay = 24 * 60 * 60 - now.getHours() * 60 * 60 - now.getMinutes() * 60 - now.getSeconds();
+
+    timer(secondsUntilNextDay * 1000)
+      .pipe(
+        switchMap(() => interval(24 * 60 * 60 * 1000).pipe(startWith(null))),
+        takeUntilDestroyed(this.destroyRef)
+      )
+      .subscribe(() => {
+        this.changeDetectorRef.detectChanges();
+      });
+  }
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes['workEntry']) {
@@ -165,4 +193,3 @@ export class WeekDayCardComponent implements OnChanges {
     this.store.dispatch(DataWorkEntriesActions.removeEntry({ week: this.week, dayOfWeek: this.weekDay }));
   }
 }
-
