@@ -67,6 +67,14 @@ export class WeekDayCardPauseComponent {
     return this.weekDayIdentifier.weekDay;
   }
 
+  get pauseTime() {
+    if (this.pauseStart === null || this.pauseEnd === null) {
+      return null;
+    }
+
+    return TimeRangeHelper.getHoursDiff(TimeRangeHelper.fromTime(this.pauseStart, this.pauseEnd));
+  }
+
   saveEntry() {
     if (!this.pauseStart || !this.pauseEnd) {
       return;

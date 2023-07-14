@@ -1,5 +1,7 @@
 @use 'variables' as *;
 
+$vertical-line-distance: 1.75rem;
+
 input[type='time'],
 input[type='date'] {
   width: 100%;
@@ -20,7 +22,7 @@ input[type='date'] {
 
     position: absolute;
     top: 0.5em;
-    left: -1.75em;
+    left: -$vertical-line-distance;
 
     background: darken($foreground, 35%);
   }
@@ -42,6 +44,15 @@ input[type='date'] {
       font-size: 1em;
       padding: 0;
     }
+  }
+
+  .pause-duration {
+    position: absolute;
+    top: 50%;
+    left: calc(-#{$vertical-line-distance} - 1.25em);
+    transform: translate(-100%, -50%);
+
+    font-size: 0.75em;
   }
 }
 

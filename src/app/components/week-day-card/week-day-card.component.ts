@@ -10,28 +10,28 @@ import {
   SimpleChanges,
   inject,
 } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { FormsModule } from '@angular/forms';
 import { Store } from '@ngrx/store';
+import { interval, startWith, switchMap, timer } from 'rxjs';
 import DateHelpers from 'src/app/core/helpers/DateHelpers';
 import { DaysOfWeek } from 'src/app/core/models/day-of-week.model';
+import { TimeRangeHelper } from 'src/app/core/models/time-range.model';
 import { WeekIdentifierHelper } from 'src/app/core/models/week-identifier.model';
 import {
   HolidayEntry,
-  isWorkDayEntry,
   WorkDayEntry,
   WorkEntry,
   WorkEntryHelper,
+  isWorkDayEntry,
 } from 'src/app/core/models/work-entry.model';
 import { WeekDayIdentifier } from 'src/app/core/models/work-week.model';
 import { HoursPipe } from 'src/app/core/pipes/hours.pipe';
 import { DataWorkEntriesActions } from 'src/app/core/state/data/data.actions';
 import { selectHoursPerDay } from 'src/app/core/state/data/data.selectors';
+import { CardComponent } from '../card/card.component';
 import { WeekDayCardPausesComponent } from './components/week-day-card-pauses/week-day-card-pauses.component';
 import { WeekDayCardTimeInputWrapperComponent } from './components/week-day-card-time-input-wrapper/week-day-card-time-input-wrapper.component';
-import { CardComponent } from '../card/card.component';
-import { TimeRangeHelper } from 'src/app/core/models/time-range.model';
-import { FormsModule } from '@angular/forms';
-import { interval, startWith, switchMap, timer } from 'rxjs';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-week-day-card',
@@ -63,11 +63,10 @@ export class WeekDayCardComponent implements OnInit, OnChanges {
 
   ngOnInit() {
     const now = new Date();
-    const secondsUntilNextDay = 24 * 60 * 60 - now.getHours() * 60 * 60 - now.getMinutes() * 60 - now.getSeconds();
 
-    timer(secondsUntilNextDay * 1000)
+    timer((60 - now.getSeconds()) * 1000)
       .pipe(
-        switchMap(() => interval(24 * 60 * 60 * 1000).pipe(startWith(null))),
+        switchMap(() => interval(60 * 1000).pipe(startWith(null))),
         takeUntilDestroyed(this.destroyRef)
       )
       .subscribe(() => {
@@ -191,5 +190,25 @@ export class WeekDayCardComponent implements OnInit, OnChanges {
 
   removeWorkEntry() {
     this.store.dispatch(DataWorkEntriesActions.removeEntry({ week: this.week, dayOfWeek: this.weekDay }));
+  }
+
+  get dayProgressIndicatorOffset() {
+    const outerOffset = '0.75em';
+
+    if (!this.isDayToday || this.workDayStart === null || this.workDayEnd === null) {
+      return outerOffset;
+    }
+
+    const timeRange = TimeRangeHelper.fromTime(this.workDayStart, this.workDayEnd);
+
+    const now = new Date();
+    const workedHours = now.getHours() + now.getMinutes() / 60;
+
+    const workedTime = TimeRangeHelper.getHoursDiff({ startHours: timeRange.startHours, endHours: workedHours });
+    const totalTime = TimeRangeHelper.getHoursDiff(timeRange);
+
+    const progress = Math.min(100, (workedTime / totalTime) * 100);
+
+    return `calc(((100% - (2 * ${outerOffset})) / 100) * ${progress} + ${outerOffset})`;
   }
 }

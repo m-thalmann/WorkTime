@@ -2,17 +2,12 @@ import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { combineLatest, map, Observable } from 'rxjs';
+import { Observable, combineLatest, map } from 'rxjs';
 import { DayOfWeek, DaysOfWeek } from 'src/app/core/models/day-of-week.model';
 import { WeekIdentifier, WeekIdentifierHelper } from 'src/app/core/models/week-identifier.model';
 import { WeekDayIdentifier, WorkWeek } from 'src/app/core/models/work-week.model';
 import { HoursPipe } from 'src/app/core/pipes/hours.pipe';
-import {
-  selectHoursPerDay,
-  selectTotalWorkHoursDiff,
-  selectWorkStartDate,
-  selectWorkWeeks,
-} from 'src/app/core/state/data/data.selectors';
+import { selectWorkWeeks } from 'src/app/core/state/data/data.selectors';
 import { CardComponent } from '../../components/card/card.component';
 import { WeekDayCardComponent } from '../../components/week-day-card/week-day-card.component';
 
@@ -91,3 +86,4 @@ export class DashboardPageComponent {
     return { week, weekDay: day } as WeekDayIdentifier;
   }
 }
+

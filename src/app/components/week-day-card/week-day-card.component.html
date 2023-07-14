@@ -22,6 +22,12 @@
                     </div>
 
                     <div class="times">
+                        <span
+                            class="day-progress"
+                            [ngStyle]="{ top: dayProgressIndicatorOffset }"
+                            *ngIf="isDayToday"
+                        ></span>
+
                         <app-week-day-card-time-input-wrapper>
                             <input
                                 appInput
