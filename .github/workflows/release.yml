@@ -1,0 +1,78 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: 'pages'
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Set env
+        run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
+
+      - name: Generate changelog
+        run: |
+          npm i -g conventional-changelog-cli@^3.0.0
+          conventional-changelog -p angular -o CHANGELOG.md -r 2
+          tail -n +2 CHANGELOG.md > CHANGELOG #remove first line
+          sed -i -e '/./,$!d' -e :a -e '/^\n*$/{$d;N;ba' -e '}' CHANGELOG #trim empty lines
+
+      - name: Build
+        run: |
+          npm i
+          npm run build
+          cd dist
+          zip -r ../release.zip work-time
+          sed -i 's/<base href="\/">/<base href="\/WorkTime\/">/g' work-time/index.html # set base href for gh-pages
+
+      - name: Release
+        uses: actions/create-release@v1
+        id: create_release
+        with:
+          draft: false
+          prerelease: false
+          release_name: WorkTime v${{ env.RELEASE_VERSION }}
+          tag_name: ${{ env.RELEASE_VERSION }}
+          body_path: CHANGELOG
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+      - name: upload artifact
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./release.zip
+          asset_name: WorkTime-${{ env.RELEASE_VERSION }}.zip
+          asset_content_type: application/zip
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v3
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v1
+        with:
+          path: 'dist/work-time'
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v2
