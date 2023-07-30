@@ -16,6 +16,7 @@ export const InitialDataState: DataState = {
   workWeeks: {},
   hoursPerDay: 8,
   workStartDate: DateHelpers.getDateString(new Date()),
+  workStartHours: 0,
   loaded: false,
 };
 
@@ -23,4 +24,5 @@ export interface SyncDataState {
   workWeeks: { [key: string]: WorkWeek };
   hoursPerDay: number;
   workStartDate: string;
+  workStartHours: number;
 }

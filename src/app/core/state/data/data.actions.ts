@@ -13,18 +13,21 @@ export const DataActions = createActionGroup({
       workWeeks: DataState['workWeeks'];
       hoursPerDay: DataState['hoursPerDay'];
       workStartDate: DataState['workStartDate'];
+      workStartHours: DataState['workStartHours'];
       syncInfo: DataState['syncInfo'];
     }>(),
     'Import data': props<{
       workWeeks: DataState['workWeeks'];
       hoursPerDay: DataState['hoursPerDay'];
       workStartDate: DataState['workStartDate'];
+      workStartHours: DataState['workStartHours'];
     }>(),
 
     'Reset data': emptyProps(),
 
     'Set hours per day': props<{ hours: number }>(),
     'Set work start date': props<{ date: string }>(),
+    'Set work start hours': props<{ hours: number }>(),
 
     'Set sync settings': props<{ settings: SyncSettings }>(),
     'Set sync history': props<{ history: string[] }>(),

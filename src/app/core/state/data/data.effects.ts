@@ -22,6 +22,7 @@ export class DataEffects {
           workWeeks: data.workWeeks || InitialDataState.workWeeks,
           hoursPerDay: data.hoursPerDay || InitialDataState.hoursPerDay,
           workStartDate: data.workStartDate || InitialDataState.workStartDate,
+          workStartHours: data.workStartHours || InitialDataState.workStartHours,
           syncInfo: data.syncInfo,
         });
       })
@@ -34,6 +35,7 @@ export class DataEffects {
         ofType(
           DataActions.importData,
           DataActions.resetData,
+          DataActions.setWorkStartHours,
           DataActions.setWorkStartDate,
           DataActions.setHoursPerDay,
           DataActions.setSyncSettings,
@@ -53,6 +55,7 @@ export class DataEffects {
               workWeeks: data.workWeeks,
               hoursPerDay: data.hoursPerDay,
               workStartDate: data.workStartDate,
+              workStartHours: data.workStartHours,
               syncInfo: data.syncInfo,
             })
           );

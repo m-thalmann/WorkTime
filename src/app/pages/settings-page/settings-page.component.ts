@@ -2,14 +2,19 @@ import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { Store } from '@ngrx/store';
-import { concatMap, concatWith, delay, lastValueFrom, map, of, startWith, switchMap, take, tap } from 'rxjs';
+import { concatMap, delay, lastValueFrom, map, of, startWith, switchMap, take } from 'rxjs';
 import { SyncSettings } from 'src/app/core/models/sync-settings.model';
 import { TimeRangeHelper } from 'src/app/core/models/time-range.model';
 import { HoursPipe } from 'src/app/core/pipes/hours.pipe';
 import { ImportExportService } from 'src/app/core/services/import-export.service';
 import { SyncService } from 'src/app/core/services/sync.service';
 import { DataActions } from 'src/app/core/state/data/data.actions';
-import { selectHoursPerDay, selectSyncInfo, selectWorkStartDate } from 'src/app/core/state/data/data.selectors';
+import {
+  selectHoursPerDay,
+  selectSyncInfo,
+  selectWorkStartDate,
+  selectWorkStartHours,
+} from 'src/app/core/state/data/data.selectors';
 import { CardComponent } from '../../components/card/card.component';
 import { isSyncTokenAuth } from '../../core/models/sync-settings.model';
 
@@ -40,6 +45,7 @@ interface SyncSettingsForm {
 export class SettingsPageComponent {
   hoursPerDay$ = this.store.select(selectHoursPerDay);
   workStartDate$ = this.store.select(selectWorkStartDate);
+  workStartHours$ = this.store.select(selectWorkStartHours);
 
   syncSettings$ = this.store.select(selectSyncInfo).pipe(map((info) => info?.settings));
 
@@ -126,6 +132,10 @@ export class SettingsPageComponent {
     this.store.dispatch(DataActions.setWorkStartDate({ date }));
   }
 
+  setWorkStartHours(hours: string) {
+    this.store.dispatch(DataActions.setWorkStartHours({ hours: TimeRangeHelper.getHoursFromString(hours) }));
+  }
+
   resetData() {
     if (!confirm('Are you sure you want to remove all data?')) {
       return;
@@ -185,4 +195,3 @@ export class SettingsPageComponent {
     }
   }
 }
-

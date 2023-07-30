@@ -11,9 +11,11 @@ export class ImportExportService {
   constructor(private store: Store) {}
 
   async exportData() {
-    const { workWeeks, hoursPerDay, workStartDate } = await lastValueFrom(this.store.select(selectData).pipe(take(1)));
+    const { workWeeks, hoursPerDay, workStartDate, workStartHours } = await lastValueFrom(
+      this.store.select(selectData).pipe(take(1))
+    );
 
-    const exportData = { workWeeks, hoursPerDay, workStartDate };
+    const exportData = { workWeeks, hoursPerDay, workStartDate, workStartHours };
 
     const element = document.createElement('a');
     element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(JSON.stringify(exportData)));
@@ -42,14 +44,13 @@ export class ImportExportService {
     reader.readAsText(file, 'UTF-8');
     reader.onload = (e) => {
       const data = JSON.parse(e.target?.result as string);
-      const { workWeeks, hoursPerDay, workStartDate } = data;
+      const { workWeeks, hoursPerDay, workStartDate, workStartHours } = data;
 
-      if (workWeeks == null || hoursPerDay == null || workStartDate == null) {
+      if (workWeeks == null || hoursPerDay == null || workStartDate == null || workStartHours == null) {
         return;
       }
 
-      this.store.dispatch(DataActions.importData({ workWeeks, hoursPerDay, workStartDate }));
+      this.store.dispatch(DataActions.importData({ workWeeks, hoursPerDay, workStartDate, workStartHours }));
     };
   }
 }
-

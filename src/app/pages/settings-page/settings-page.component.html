@@ -3,6 +3,7 @@
     *ngIf="{
         hoursPerDay: hoursPerDay$ | async,
         workStartDate: workStartDate$ | async,
+        workStartHours: workStartHours$ | async,
         syncSettingsSavedIndicator: syncSettingsSavedIndicator$ | async,
         isSyncing: sync.isSyncing$ | async
     } as vm"
@@ -34,6 +35,17 @@
                 [value]="vm.workStartDate"
                 (change)="setWorkStartDate(workStartDateInput.value)"
                 #workStartDateInput
+            />
+        </label>
+
+        <label>
+            Hours before start
+            <input
+                appInput
+                type="time"
+                [value]="vm.workStartHours | hours"
+                (change)="setWorkStartHours(workStartHoursInput.value)"
+                #workStartHoursInput
             />
         </label>
 
@@ -154,4 +166,3 @@
         <button appButton (click)="importExport.importData()"><i class="fa-solid fa-upload"></i> Import data</button>
     </app-card>
 </div>
-

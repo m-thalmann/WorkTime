@@ -15,12 +15,12 @@ export const dataReducer = createReducer(
 
   on(DataActions.loadData, (state) => ({ ...state, loaded: false })),
 
-  on(DataActions.loadDataSuccess, (state, { workWeeks, hoursPerDay, workStartDate, syncInfo }) => {
-    return { ...state, workWeeks, hoursPerDay, workStartDate, syncInfo, loaded: true };
+  on(DataActions.loadDataSuccess, (state, { workWeeks, hoursPerDay, workStartDate, workStartHours, syncInfo }) => {
+    return { ...state, workWeeks, hoursPerDay, workStartDate, workStartHours: workStartHours, syncInfo, loaded: true };
   }),
 
-  on(DataActions.importData, (state, { workWeeks, hoursPerDay, workStartDate }) => {
-    return { ...state, workWeeks, hoursPerDay, workStartDate, loaded: true };
+  on(DataActions.importData, (state, { workWeeks, hoursPerDay, workStartDate, workStartHours }) => {
+    return { ...state, workWeeks, hoursPerDay, workStartDate, workStartHours, loaded: true };
   }),
 
   on(DataActions.resetData, (_) => {
@@ -33,6 +33,10 @@ export const dataReducer = createReducer(
 
   on(DataActions.setWorkStartDate, (state, { date }) => {
     return { ...state, workStartDate: date };
+  }),
+
+  on(DataActions.setWorkStartHours, (state, { hours }) => {
+    return { ...state, workStartHours: hours };
   }),
 
   on(DataActions.setSyncSettings, (state, { settings }) => {
