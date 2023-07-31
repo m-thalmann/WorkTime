@@ -193,22 +193,87 @@ export class WeekDayCardComponent implements OnInit, OnChanges {
   }
 
   get dayProgressIndicatorOffset() {
-    const outerOffset = '0.75em';
+    // fixed rem values to calculate exact offset of indicator
+    const lineHeight = 1.75;
+    const prePauseGap = 2;
+    const innerPauseHeight = 1;
+    const pauseGap = 1.5;
+    const afterPauseGap = 2 + 1.5 + 1.5;
 
-    if (!this.isDayToday || this.workDayStart === null || this.workDayEnd === null) {
-      return outerOffset;
+    const getOffset = (rem: number) => `${rem}rem`;
+
+    if (!this.workEntry || !isWorkDayEntry(this.workEntry)) {
+      return getOffset(lineHeight / 2);
     }
 
-    const timeRange = TimeRangeHelper.fromTime(this.workDayStart, this.workDayEnd);
+    if (!this.isDayToday || this.workDayStart === null || this.workDayEnd === null) {
+      return getOffset(lineHeight / 2);
+    }
 
     const now = new Date();
     const workedHours = now.getHours() + now.getMinutes() / 60;
 
+    const pauses = this.workEntry.pauses;
+
+    let rangeStart = this.workDayStart;
+    let rangeStartOffset = lineHeight / 2;
+    let rangeEnd = this.workDayEnd;
+    let rangeEndOffset =
+      lineHeight +
+      prePauseGap +
+      pauses.length * (2 * lineHeight + innerPauseHeight) +
+      (pauses.length - 1) * pauseGap +
+      afterPauseGap +
+      lineHeight / 2;
+
+    if (pauses.length > 0) {
+      rangeStartOffset += lineHeight + prePauseGap;
+    }
+
+    for (let i = 0; i < pauses.length; i++) {
+      const pause = pauses[i];
+
+      if (workedHours < pause.startHours) {
+        if (i > 0) {
+          rangeStart = TimeRangeHelper.getTimeString(pauses[i - 1].endHours);
+        }
+        rangeEnd = TimeRangeHelper.getTimeString(pause.startHours);
+
+        if (i > 0) {
+          rangeStartOffset -= pauseGap + lineHeight;
+        } else {
+          rangeStartOffset = lineHeight / 2;
+        }
+        rangeEndOffset = rangeStartOffset + pauseGap + lineHeight;
+
+        break;
+      } else if (workedHours <= pause.endHours) {
+        rangeStart = TimeRangeHelper.getTimeString(pause.startHours);
+        rangeEnd = TimeRangeHelper.getTimeString(pause.endHours);
+
+        rangeEndOffset = rangeStartOffset + lineHeight + innerPauseHeight;
+
+        break;
+      }
+
+      rangeStartOffset += lineHeight + innerPauseHeight;
+
+      if (i < pauses.length - 1) {
+        rangeStartOffset += pauseGap + lineHeight;
+      }
+    }
+
+    if (pauses.length > 0 && workedHours > pauses[pauses.length - 1].endHours) {
+      rangeStart = TimeRangeHelper.getTimeString(pauses[pauses.length - 1].endHours);
+    }
+
+    const timeRange = TimeRangeHelper.fromTime(rangeStart, rangeEnd);
+
     const workedTime = TimeRangeHelper.getHoursDiff({ startHours: timeRange.startHours, endHours: workedHours });
     const totalTime = TimeRangeHelper.getHoursDiff(timeRange);
 
-    const progress = Math.min(100, (workedTime / totalTime) * 100);
+    const progress = Math.min(1, workedTime / totalTime);
 
-    return `calc(((100% - (2 * ${outerOffset})) / 100) * ${progress} + ${outerOffset})`;
+    return getOffset(rangeStartOffset + (rangeEndOffset - rangeStartOffset) * progress);
   }
 }
