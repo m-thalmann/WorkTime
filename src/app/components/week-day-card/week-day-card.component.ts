@@ -13,7 +13,7 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { Store } from '@ngrx/store';
-import { interval, startWith, switchMap, timer } from 'rxjs';
+import { EMPTY, fromEvent, interval, map, merge, startWith, switchMap, timer } from 'rxjs';
 import DateHelpers from 'src/app/core/helpers/DateHelpers';
 import { DaysOfWeek } from 'src/app/core/models/day-of-week.model';
 import { TimeRangeHelper } from 'src/app/core/models/time-range.model';
@@ -62,11 +62,22 @@ export class WeekDayCardComponent implements OnInit, OnChanges {
   constructor(private store: Store, private changeDetectorRef: ChangeDetectorRef) {}
 
   ngOnInit() {
-    const now = new Date();
-
-    timer((60 - now.getSeconds()) * 1000)
+    merge(fromEvent(window, 'focus'), fromEvent(window, 'blur'))
       .pipe(
-        switchMap(() => interval(60 * 1000).pipe(startWith(null))),
+        map((event) => event.type),
+        startWith(document.hasFocus() ? 'focus' : 'blur'),
+        switchMap((type) => {
+          const now = new Date();
+
+          if (type === 'focus') {
+            return timer((60 - now.getSeconds()) * 1000).pipe(
+              switchMap(() => interval(60 * 1000).pipe(startWith(null))),
+              startWith(null)
+            );
+          }
+
+          return EMPTY;
+        }),
         takeUntilDestroyed(this.destroyRef)
       )
       .subscribe(() => {
