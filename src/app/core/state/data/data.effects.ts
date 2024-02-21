@@ -23,6 +23,7 @@ export class DataEffects {
           hoursPerDay: data.hoursPerDay || InitialDataState.hoursPerDay,
           workStartDate: data.workStartDate || InitialDataState.workStartDate,
           workStartHours: data.workStartHours || InitialDataState.workStartHours,
+          useDecimalHours: data.useDecimalHours ?? InitialDataState.useDecimalHours,
           syncInfo: data.syncInfo,
         });
       })
@@ -38,6 +39,7 @@ export class DataEffects {
           DataActions.setWorkStartHours,
           DataActions.setWorkStartDate,
           DataActions.setHoursPerDay,
+          DataActions.setUseDecimalHours,
           DataActions.setSyncSettings,
           DataActions.setSyncHistory,
           DataActions.resetSync,

@@ -4,6 +4,7 @@
         hoursPerDay: hoursPerDay$ | async,
         workStartDate: workStartDate$ | async,
         workStartHours: workStartHours$ | async,
+        useDecimalHours: useDecimalHours$ | async,
         syncSettingsSavedIndicator: syncSettingsSavedIndicator$ | async,
         isSyncing: sync.isSyncing$ | async
     } as vm"
@@ -46,6 +47,16 @@
                 [value]="vm.workStartHours | hours"
                 (change)="setWorkStartHours(workStartHoursInput.value)"
                 #workStartHoursInput
+            />
+        </label>
+
+        <label>
+            Use decimal hours (4,5 vs. 4:30)
+            <input
+                type="checkbox"
+                [checked]="vm.useDecimalHours",
+                (change)="setUseDecimalHours(useDecimalHoursCheckbox.checked)"
+                #useDecimalHoursCheckbox
             />
         </label>
 

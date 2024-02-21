@@ -12,12 +12,13 @@ export const selectWorkWeeks = createSelector(selectData, (state: DataState) => 
 export const selectHoursPerDay = createSelector(selectData, (state: DataState) => state.hoursPerDay);
 export const selectWorkStartDate = createSelector(selectData, (state: DataState) => state.workStartDate);
 export const selectWorkStartHours = createSelector(selectData, (state: DataState) => state.workStartHours);
+export const selectUseDecimalHours = createSelector(selectData, (state: DataState) => state.useDecimalHours);
 export const selectSyncInfo = createSelector(selectData, (state: DataState) => state.syncInfo);
 
 export const selectSyncData = createSelector(selectData, (state: DataState) => {
-  const { workWeeks, hoursPerDay, workStartDate, workStartHours } = state;
+  const { workWeeks, hoursPerDay, workStartDate, workStartHours, useDecimalHours } = state;
 
-  return { workWeeks, hoursPerDay, workStartDate, workStartHours } as SyncDataState;
+  return { workWeeks, hoursPerDay, workStartDate, workStartHours, useDecimalHours } as SyncDataState;
 });
 
 export const selectTotalWorkHoursDiff = createSelector(selectData, (state: DataState) => {

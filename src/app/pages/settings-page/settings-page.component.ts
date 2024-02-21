@@ -14,6 +14,7 @@ import {
   selectSyncInfo,
   selectWorkStartDate,
   selectWorkStartHours,
+  selectUseDecimalHours,
 } from 'src/app/core/state/data/data.selectors';
 import { CardComponent } from '../../components/card/card.component';
 import { isSyncTokenAuth } from '../../core/models/sync-settings.model';
@@ -46,6 +47,7 @@ export class SettingsPageComponent {
   hoursPerDay$ = this.store.select(selectHoursPerDay);
   workStartDate$ = this.store.select(selectWorkStartDate);
   workStartHours$ = this.store.select(selectWorkStartHours);
+  useDecimalHours$ = this.store.select(selectUseDecimalHours);
 
   syncSettings$ = this.store.select(selectSyncInfo).pipe(map((info) => info?.settings));
 
@@ -134,6 +136,10 @@ export class SettingsPageComponent {
 
   setWorkStartHours(hours: string) {
     this.store.dispatch(DataActions.setWorkStartHours({ hours: TimeRangeHelper.getHoursFromString(hours) }));
+  }
+
+  setUseDecimalHours(useDecimalHours: boolean) {
+    this.store.dispatch(DataActions.setUseDecimalHours({ useDecimalHours }));
   }
 
   resetData() {

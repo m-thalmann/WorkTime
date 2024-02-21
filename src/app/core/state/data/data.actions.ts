@@ -14,6 +14,7 @@ export const DataActions = createActionGroup({
       hoursPerDay: DataState['hoursPerDay'];
       workStartDate: DataState['workStartDate'];
       workStartHours: DataState['workStartHours'];
+      useDecimalHours: DataState['useDecimalHours'];
       syncInfo: DataState['syncInfo'];
     }>(),
     'Import data': props<{
@@ -21,6 +22,7 @@ export const DataActions = createActionGroup({
       hoursPerDay: DataState['hoursPerDay'];
       workStartDate: DataState['workStartDate'];
       workStartHours: DataState['workStartHours'];
+      useDecimalHours: DataState['useDecimalHours'];
     }>(),
 
     'Reset data': emptyProps(),
@@ -28,6 +30,7 @@ export const DataActions = createActionGroup({
     'Set hours per day': props<{ hours: number }>(),
     'Set work start date': props<{ date: string }>(),
     'Set work start hours': props<{ hours: number }>(),
+    'Set use decimal hours': props<{ useDecimalHours: boolean }>(),
 
     'Set sync settings': props<{ settings: SyncSettings }>(),
     'Set sync history': props<{ history: string[] }>(),

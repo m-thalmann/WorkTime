@@ -39,6 +39,10 @@ export const dataReducer = createReducer(
     return { ...state, workStartHours: hours };
   }),
 
+  on(DataActions.setUseDecimalHours, (state, { useDecimalHours }) => {
+    return { ...state, useDecimalHours };
+  }),
+
   on(DataActions.setSyncSettings, (state, { settings }) => {
     const newState = { ...state };
 
