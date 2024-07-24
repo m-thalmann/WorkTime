@@ -1,5 +1,5 @@
-dist
-node_modules
-package-lock.json
-
+/dist
+/coverage
+/.nx/cache
+/.nx/workspace-data
 .angular
