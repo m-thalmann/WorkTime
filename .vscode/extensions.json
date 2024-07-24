@@ -2,6 +2,7 @@
   "recommendations": [
     "nrwl.angular-console",
     "angular.ng-template",
+    "YoavBls.pretty-ts-errors",
     "esbenp.prettier-vscode",
     "dbaeumer.vscode-eslint",
     "firsttris.vscode-jest-runner"
