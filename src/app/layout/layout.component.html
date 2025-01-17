@@ -1,11 +1,4 @@
-<header
-    *ngIf="{
-        totalWorkHoursDiff: totalWorkHoursDiff$ | async,
-        syncEnabled: sync.isSyncEnabled$ | async,
-        isSyncing: sync.isSyncing$ | async,
-        syncIcon: syncIcon$ | async
-    } as vm"
->
+<header>
     <div class="header-content">
         <a appButton routerLink="/settings" routerLinkActive="hidden" class="nav-button">
             <i class="fa-solid fa-gear"></i>
@@ -13,28 +6,22 @@
         <a appButton routerLink="/dashboard" routerLinkActive="hidden" class="nav-button">
             <i class="fa-solid fa-home"></i>
         </a>
-
         <div class="title">
             <img src="assets/images/icon.png" />
-
             <h1>WorkTime</h1>
-
-            <div class="total-work-diff" [class.reached]="isReached(vm.totalWorkHoursDiff || 0)">
-                {{ vm.totalWorkHoursDiff | hours : true }}
+            <div class="total-work-diff" [class.reached]="hasPositiveHours()">
+                {{ totalWorkHoursDiff() | hours : true }}
             </div>
         </div>
-
         <div class="sync-buttons">
-            <ng-container *ngIf="vm.syncEnabled">
-                <button appButton (click)="syncData()" [disabled]="vm.isSyncing">
-                    <i [class]="'fa-solid ' + vm.syncIcon" [class.animation-rotate]="vm.isSyncing"></i>
-                </button>
-            </ng-container>
-
-            <ng-container *ngIf="!vm.syncEnabled">
-                <button appButton (click)="importExport.exportData()"><i class="fa-solid fa-download"></i></button>
-                <button appButton (click)="importExport.importData()"><i class="fa-solid fa-upload"></i></button>
-            </ng-container>
+            @if (syncEnabled()) {
+            <button appButton (click)="syncData()" [disabled]="isSyncing()">
+                <i [class]="'fa-solid ' + syncIcon()" [class.animation-rotate]="isSyncing()"></i>
+            </button>
+            } @else {
+            <button appButton (click)="importExport.exportData()"><i class="fa-solid fa-download"></i></button>
+            <button appButton (click)="importExport.importData()"><i class="fa-solid fa-upload"></i></button>
+            }
         </div>
     </div>
 </header>
@@ -42,4 +29,3 @@
 <main>
     <router-outlet></router-outlet>
 </main>
-

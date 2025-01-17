@@ -1,8 +1,9 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter } from '@angular/core';
-import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { ChangeDetectionStrategy, Component, EventEmitter, inject } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { NonNullableFormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { Store } from '@ngrx/store';
-import { concatMap, delay, lastValueFrom, map, of, startWith, switchMap, take } from 'rxjs';
+import { concatMap, delay, map, of, startWith, switchMap } from 'rxjs';
 import { SyncSettings } from 'src/app/core/models/sync-settings.model';
 import { TimeRangeHelper } from 'src/app/core/models/time-range.model';
 import { HoursPipe } from 'src/app/core/pipes/hours.pipe';
@@ -18,83 +19,72 @@ import {
 import { CardComponent } from '../../components/card/card.component';
 import { isSyncTokenAuth } from '../../core/models/sync-settings.model';
 
-interface SyncSettingsForm {
-  enabled: FormControl<boolean>;
-  url: FormControl<string>;
-  updateMethod: FormControl<'PUT' | 'PATCH' | 'POST'>;
-  authenticationType: FormControl<'basic' | 'token' | null>;
-  tokenAuthentication: FormGroup<{
-    token: FormControl<string>;
-    location: FormControl<'query' | 'header'>;
-    queryParam: FormControl<string>;
-  }>;
-  basicAuthentication: FormGroup<{
-    username: FormControl<string>;
-    password: FormControl<string>;
-  }>;
-}
-
 @Component({
   selector: 'app-settings-page',
-  standalone: true,
   templateUrl: './settings-page.component.html',
   styleUrls: ['./settings-page.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule, HoursPipe, CardComponent, ReactiveFormsModule],
 })
 export class SettingsPageComponent {
-  hoursPerDay$ = this.store.select(selectHoursPerDay);
-  workStartDate$ = this.store.select(selectWorkStartDate);
-  workStartHours$ = this.store.select(selectWorkStartHours);
+  private readonly store = inject(Store);
+  readonly importExport = inject(ImportExportService);
+  readonly sync = inject(SyncService);
+  private readonly fb = inject(NonNullableFormBuilder);
 
-  syncSettings$ = this.store.select(selectSyncInfo).pipe(map((info) => info?.settings));
+  readonly hoursPerDay = toSignal(this.store.select(selectHoursPerDay), { requireSync: true });
+  readonly workStartDate = toSignal(this.store.select(selectWorkStartDate), { requireSync: true });
+  readonly workStartHours = toSignal(this.store.select(selectWorkStartHours), { requireSync: true });
 
-  private syncSettingsSavedIndicatorEvent$ = new EventEmitter();
-  syncSettingsSavedIndicator$ = this.syncSettingsSavedIndicatorEvent$.pipe(
-    switchMap(() => of(true, false)),
-    concatMap((value) => {
-      if (value) {
-        return of(value);
-      } else {
-        return of(value).pipe(delay(1000));
-      }
-    }),
-    startWith(false)
+  readonly syncSettings = toSignal(this.store.select(selectSyncInfo).pipe(map((info) => info?.settings)), {
+    requireSync: true,
+  });
+
+  private readonly syncSettingsSavedIndicatorEvent$ = new EventEmitter();
+  readonly syncSettingsSavedIndicator = toSignal(
+    this.syncSettingsSavedIndicatorEvent$.pipe(
+      switchMap(() => of(true, false)),
+      concatMap((value) => {
+        if (value) {
+          return of(value);
+        } else {
+          return of(value).pipe(delay(1000));
+        }
+      }),
+      startWith(false)
+    ),
+    { requireSync: true }
   );
 
-  syncSettingsForm: FormGroup;
+  readonly isSyncing = toSignal(this.sync.isSyncing$, { requireSync: true });
 
-  constructor(
-    private store: Store,
-    public importExport: ImportExportService,
-    public sync: SyncService,
-    private changeDetectorRef: ChangeDetectorRef
-  ) {
-    this.syncSettingsForm = new FormGroup<SyncSettingsForm>({
-      enabled: new FormControl(false, { nonNullable: true }),
-      url: new FormControl('', { nonNullable: true }),
-      updateMethod: new FormControl('PUT', { nonNullable: true }),
-      authenticationType: new FormControl(null),
-      tokenAuthentication: new FormGroup({
-        token: new FormControl('', { nonNullable: true }),
-        location: new FormControl<'header' | 'query'>('header', { nonNullable: true }),
-        queryParam: new FormControl('', { nonNullable: true }),
-      }),
-      basicAuthentication: new FormGroup({
-        username: new FormControl('', { nonNullable: true }),
-        password: new FormControl('', { nonNullable: true }),
-      }),
-    });
+  readonly syncSettingsForm = this.fb.group({
+    enabled: this.fb.control(false),
+    url: this.fb.control(''),
+    updateMethod: this.fb.control<'PUT' | 'PATCH' | 'POST'>('PUT'),
+    authenticationType: this.fb.control<'basic' | 'token' | null>(null),
+    tokenAuthentication: this.fb.group({
+      token: this.fb.control(''),
+      location: this.fb.control<'query' | 'header'>('header'),
+      queryParam: this.fb.control(''),
+    }),
+    basicAuthentication: this.fb.group({
+      username: this.fb.control(''),
+      password: this.fb.control(''),
+    }),
+  });
+
+  constructor() {
     this.setupSyncSettingsForm();
   }
 
   private async setupSyncSettingsForm() {
-    const settings = await lastValueFrom(this.syncSettings$.pipe(take(1)));
+    const settings = this.syncSettings();
 
     if (settings) {
       const { url, updateMethod, authentication } = settings;
 
-      let authenticationType;
+      let authenticationType: 'token' | 'basic' | null = null;
       let basicAuthentication;
       let tokenAuthentication;
 
@@ -119,8 +109,6 @@ export class SettingsPageComponent {
       };
 
       this.syncSettingsForm.patchValue(updateData);
-
-      this.changeDetectorRef.detectChanges();
     }
   }
 
@@ -147,7 +135,7 @@ export class SettingsPageComponent {
   updateSyncSettings() {
     // TODO: add validation
 
-    const formData = this.syncSettingsForm.value;
+    const formData = this.syncSettingsForm.getRawValue();
 
     if (!formData.enabled) {
       this.store.dispatch(DataActions.resetSync());

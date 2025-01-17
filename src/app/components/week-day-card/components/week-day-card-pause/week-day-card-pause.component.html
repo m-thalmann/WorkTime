@@ -6,14 +6,17 @@
 </app-week-day-card-time-input-wrapper>
 
 <div class="buttons">
-    <button appButton (click)="saveEntry()" class="accept-button" data-color="primary" *ngIf="hasChanges">
+    @if (hasChanges()) {
+    <button appButton (click)="saveEntry()" class="accept-button" data-color="primary">
         <i class="fa-solid fa-check"></i>
     </button>
+    }
 
     <button appButton (click)="removeEntry()" class="delete-button" data-color="warn">
         <i class="fa-solid fa-minus"></i>
     </button>
 </div>
 
-<span class="pause-duration" *ngIf="pauseTime !== null">{{ pauseTime | hours }}</span>
-
+@if (pauseTime() !== null) {
+<span class="pause-duration">{{ pauseTime() | hours }}</span>
+}

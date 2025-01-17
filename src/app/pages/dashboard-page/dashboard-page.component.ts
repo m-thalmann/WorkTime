@@ -1,64 +1,70 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { Observable, combineLatest, map } from 'rxjs';
+import { map } from 'rxjs';
 import { DayOfWeek, DaysOfWeek } from 'src/app/core/models/day-of-week.model';
 import { WeekIdentifier, WeekIdentifierHelper } from 'src/app/core/models/week-identifier.model';
 import { WeekDayIdentifier, WorkWeek } from 'src/app/core/models/work-week.model';
-import { HoursPipe } from 'src/app/core/pipes/hours.pipe';
 import { selectWorkWeeks } from 'src/app/core/state/data/data.selectors';
-import { CardComponent } from '../../components/card/card.component';
 import { WeekDayCardComponent } from '../../components/week-day-card/week-day-card.component';
 
 @Component({
   selector: 'app-dashboard-page',
-  standalone: true,
   templateUrl: './dashboard-page.component.html',
   styleUrls: ['./dashboard-page.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, HoursPipe, WeekDayCardComponent, CardComponent],
+  imports: [CommonModule, WeekDayCardComponent],
 })
 export class DashboardPageComponent {
-  selectedWeek$: Observable<WeekIdentifier> = this.route.queryParams.pipe(
-    map((params) => {
-      const year = parseInt(params['year']);
-      const weekNumber = parseInt(params['week']);
+  private readonly store = inject(Store);
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
 
-      if (!year || !weekNumber) {
-        return WeekIdentifierHelper.fromDate(new Date());
-      }
+  readonly selectedWeek = toSignal(
+    this.route.queryParams.pipe(
+      map((params) => {
+        const year = parseInt(params['year']);
+        const weekNumber = parseInt(params['week']);
 
-      return {
-        year,
-        weekNumber,
-      };
-    })
+        if (!year || !weekNumber) {
+          return WeekIdentifierHelper.fromDate(new Date());
+        }
+
+        return {
+          year,
+          weekNumber,
+        };
+      })
+    ),
+    { requireSync: true }
   );
 
-  currentWeekData$: Observable<WorkWeek> = combineLatest([this.selectedWeek$, this.store.select(selectWorkWeeks)]).pipe(
-    map(([week, weekData]) => {
-      const data = weekData[WeekIdentifierHelper.getKey(week)];
+  protected readonly weekData = toSignal(this.store.select(selectWorkWeeks), { requireSync: true });
 
-      if (data !== undefined) {
-        return data;
-      }
+  readonly currentWeekData = computed(() => {
+    const week = this.selectedWeek();
+    const weekData = this.weekData();
 
-      return {
-        week: week,
-        entries: {},
-      } as WorkWeek;
-    })
-  );
+    const data = weekData[WeekIdentifierHelper.getKey(week)];
 
-  constructor(private store: Store, private route: ActivatedRoute, private router: Router) {}
+    if (data !== undefined) {
+      return data;
+    }
+
+    return {
+      week: week,
+      entries: {},
+    } as WorkWeek;
+  });
 
   get weekDays() {
     return DaysOfWeek;
   }
 
-  nextWeek(week: WeekIdentifier, amount: number) {
-    const weekDate = WeekIdentifierHelper.getStartOfWeek(week);
+  nextWeek(amount: number) {
+    const weekDate = WeekIdentifierHelper.getStartOfWeek(this.selectedWeek());
     weekDate.setDate(weekDate.getDate() + 7 * amount);
 
     const newWeek = WeekIdentifierHelper.fromDate(weekDate);
@@ -78,12 +84,7 @@ export class DashboardPageComponent {
     });
   }
 
-  getDayData(data: WorkWeek, day: DayOfWeek) {
-    return data.entries[day];
-  }
-
-  getWeekDayIdentifier(week: WeekIdentifier, day: DayOfWeek) {
-    return { week, weekDay: day } as WeekDayIdentifier;
+  getWeekDayIdentifier(day: DayOfWeek) {
+    return { week: this.selectedWeek(), weekDay: day } as WeekDayIdentifier;
   }
 }
-

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject } from 'rxjs';
@@ -8,6 +8,7 @@ import { HoursPipe } from '../core/pipes/hours.pipe';
 import { ImportExportService } from '../core/services/import-export.service';
 import { SyncService } from '../core/services/sync.service';
 import { selectTotalWorkHoursDiff } from '../core/state/data/data.selectors';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 const syncResultIcons: { [key in SyncResult]: string } = {
   [SyncResult.NoUpdate]: 'fa-circle-check',
@@ -20,38 +21,39 @@ const defaultSyncIcon = 'fa-sync';
 
 @Component({
   selector: 'app-layout',
-  standalone: true,
   imports: [CommonModule, RouterModule, HoursPipe],
   templateUrl: './layout.component.html',
   styleUrls: ['./layout.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LayoutComponent {
-  totalWorkHoursDiff$ = this.store.select(selectTotalWorkHoursDiff);
+  private readonly store = inject(Store);
+  readonly importExport = inject(ImportExportService);
+  private readonly sync = inject(SyncService);
 
-  syncIcon$ = new BehaviorSubject(defaultSyncIcon);
+  readonly totalWorkHoursDiff = toSignal(this.store.select(selectTotalWorkHoursDiff), { requireSync: true });
+  readonly hasPositiveHours = computed(() => this.totalWorkHoursDiff() >= 0);
 
-  constructor(private store: Store, public importExport: ImportExportService, public sync: SyncService) {}
+  readonly syncEnabled = toSignal(this.sync.isSyncEnabled$, { requireSync: true });
+  readonly isSyncing = toSignal(this.sync.isSyncing$, { requireSync: true });
+
+  readonly syncIcon = signal(defaultSyncIcon);
 
   async syncData() {
     try {
       const syncResult = await this.sync.sync();
 
-      this.syncIcon$.next(syncResultIcons[syncResult]);
+      this.syncIcon.set(syncResultIcons[syncResult]);
 
       if (syncResult === SyncResult.Conflict) {
         alert('Conflict detected. Please resolve the conflict in the settings by forcing a push or pull.');
       }
     } catch (e) {
-      this.syncIcon$.next('fa-circle-exclamation');
+      this.syncIcon.set('fa-circle-exclamation');
       alert('Sync failed!');
     }
 
     await new Promise((resolve) => setTimeout(resolve, 1000));
-    this.syncIcon$.next(defaultSyncIcon);
-  }
-
-  isReached(hours: number) {
-    return Math.round(hours * 60) >= 0;
+    this.syncIcon.set(defaultSyncIcon);
   }
 }

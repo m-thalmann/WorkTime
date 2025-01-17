@@ -1,3 +1,4 @@
+@use 'sass:color';
 @use 'variables' as *;
 
 :host {
@@ -9,7 +10,7 @@
     content: '';
     width: 1.5em;
     height: 1.5em;
-    background: darken($foreground, 10%);
+    background: color.scale($foreground, $lightness: -10%);
     border-radius: 50%;
 
     position: absolute;
@@ -18,4 +19,3 @@
     transform: translateY(-50%);
   }
 }
-

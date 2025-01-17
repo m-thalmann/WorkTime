@@ -1,19 +1,33 @@
 import { CommonModule } from '@angular/common';
 import {
   ChangeDetectionStrategy,
-  ChangeDetectorRef,
   Component,
   DestroyRef,
-  Input,
-  OnChanges,
   OnInit,
-  SimpleChanges,
+  computed,
+  effect,
   inject,
+  input,
+  model,
+  signal,
+  untracked,
 } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { Store } from '@ngrx/store';
-import { EMPTY, fromEvent, interval, map, merge, startWith, switchMap, timer } from 'rxjs';
+import {
+  distinctUntilChanged,
+  EMPTY,
+  fromEvent,
+  interval,
+  map,
+  merge,
+  of,
+  startWith,
+  switchMap,
+  tap,
+  timer,
+} from 'rxjs';
 import DateHelpers from 'src/app/core/helpers/DateHelpers';
 import { DaysOfWeek } from 'src/app/core/models/day-of-week.model';
 import { TimeRangeHelper } from 'src/app/core/models/time-range.model';
@@ -35,7 +49,6 @@ import { WeekDayCardTimeInputWrapperComponent } from './components/week-day-card
 
 @Component({
   selector: 'app-week-day-card',
-  standalone: true,
   templateUrl: './week-day-card.component.html',
   styleUrls: ['./week-day-card.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -48,162 +61,85 @@ import { WeekDayCardTimeInputWrapperComponent } from './components/week-day-card
     FormsModule,
   ],
 })
-export class WeekDayCardComponent implements OnInit, OnChanges {
-  private destroyRef = inject(DestroyRef);
+export class WeekDayCardComponent implements OnInit {
+  private readonly store = inject(Store);
 
-  @Input() weekDayIdentifier!: WeekDayIdentifier;
-  @Input() workEntry!: WorkEntry | null;
+  private readonly destroyRef = inject(DestroyRef);
 
-  workDayStart: string | null = null;
-  workDayEnd: string | null = null;
+  readonly weekDayIdentifier = input.required<WeekDayIdentifier>();
+  readonly workEntry = input.required<WorkEntry | null>();
 
-  hoursPerDay$ = this.store.select(selectHoursPerDay);
+  readonly workDayStart = model<string | null>(null);
+  readonly workDayEnd = model<string | null>(null);
 
-  constructor(private store: Store, private changeDetectorRef: ChangeDetectorRef) {}
+  readonly hoursPerDay = toSignal(this.store.select(selectHoursPerDay), { requireSync: true });
 
-  ngOnInit() {
-    merge(fromEvent(window, 'focus'), fromEvent(window, 'blur'))
-      .pipe(
-        map((event) => event.type),
-        startWith(document.hasFocus() ? 'focus' : 'blur'),
-        switchMap((type) => {
-          const now = new Date();
-
-          if (type === 'focus') {
-            return timer((60 - now.getSeconds()) * 1000).pipe(
-              switchMap(() => interval(60 * 1000).pipe(startWith(null))),
-              startWith(null)
-            );
-          }
-
-          return EMPTY;
-        }),
-        takeUntilDestroyed(this.destroyRef)
-      )
-      .subscribe(() => {
-        this.changeDetectorRef.detectChanges();
-      });
-  }
-
-  ngOnChanges(changes: SimpleChanges) {
-    if (changes['workEntry']) {
-      const workEntry = changes['workEntry'].currentValue;
-
-      if (workEntry && isWorkDayEntry(workEntry)) {
-        this.workDayStart = TimeRangeHelper.getTimeString(workEntry.timeRange.startHours);
-        this.workDayEnd = TimeRangeHelper.getTimeString(workEntry.timeRange.endHours);
-      } else {
-        this.workDayStart = null;
-        this.workDayEnd = null;
-      }
-    }
-  }
-
-  get hasChanges() {
-    if (this.workEntry === null || !isWorkDayEntry(this.workEntry)) {
+  readonly hasChanges = computed(() => {
+    const workEntry = this.workEntry();
+    if (workEntry === null || !isWorkDayEntry(workEntry)) {
       return false;
     }
 
-    const newStart = this.workDayStart !== null ? TimeRangeHelper.getHoursFromString(this.workDayStart) : null;
-    const newEnd = this.workDayEnd !== null ? TimeRangeHelper.getHoursFromString(this.workDayEnd) : null;
+    const workDayStart = this.workDayStart();
+    const workDayEnd = this.workDayEnd();
 
-    return this.workEntry.timeRange.startHours !== newStart || this.workEntry.timeRange.endHours !== newEnd;
-  }
+    const newStart = workDayStart !== null ? TimeRangeHelper.getHoursFromString(workDayStart) : null;
+    const newEnd = workDayEnd !== null ? TimeRangeHelper.getHoursFromString(workDayEnd) : null;
 
-  get week() {
-    return this.weekDayIdentifier.week;
-  }
+    return workEntry.timeRange.startHours !== newStart || workEntry.timeRange.endHours !== newEnd;
+  });
 
-  get weekDay() {
-    return this.weekDayIdentifier.weekDay;
-  }
+  readonly week = computed(() => this.weekDayIdentifier().week);
+  readonly weekDay = computed(() => this.weekDayIdentifier().weekDay);
+  readonly weekStart = computed(() => WeekIdentifierHelper.getStartOfWeek(this.week()));
 
-  get weekStart() {
-    return WeekIdentifierHelper.getStartOfWeek(this.week);
-  }
+  readonly date = computed(() => {
+    const weekDayIdentifier = this.weekDayIdentifier();
 
-  get date() {
-    let dayIndex = DaysOfWeek.indexOf(this.weekDayIdentifier.weekDay);
+    const dayIndex = DaysOfWeek.indexOf(weekDayIdentifier.weekDay);
 
-    let date = new Date(this.weekStart);
+    const date = new Date(WeekIdentifierHelper.getStartOfWeek(weekDayIdentifier.week));
     date.setDate(date.getDate() + dayIndex);
 
     return date;
-  }
+  });
 
-  get dayDateString() {
-    return DateHelpers.getDayDateString(this.date);
-  }
+  readonly dayDateString = computed(() => DateHelpers.getDayDateString(this.date()));
 
-  get workDay() {
-    if (this.workEntry && isWorkDayEntry(this.workEntry)) {
-      return this.workEntry;
+  readonly workDay = computed(() => {
+    const workEntry = this.workEntry();
+
+    if (workEntry && isWorkDayEntry(workEntry)) {
+      return workEntry;
     }
 
     return null;
-  }
+  });
 
-  get workHours() {
-    return this.workEntry !== null ? WorkEntryHelper.getWorkHours(this.workEntry) : 0;
-  }
+  readonly workHours = computed(() => {
+    const workEntry = this.workEntry();
 
-  getDiffHours(hoursPerDay: number | null) {
-    return TimeRangeHelper.getHoursDiff({ startHours: hoursPerDay || 0, endHours: this.workHours });
-  }
-
-  get isDayToday() {
-    return DateHelpers.isToday(this.date);
-  }
-
-  get isDayInFuture() {
-    return DateHelpers.isInFuture(this.date);
-  }
-
-  isReached(hours: number) {
-    return Math.round(hours * 60) >= 0;
-  }
-
-  addWorkDayEntry() {
-    let week = WeekIdentifierHelper.fromDate(this.weekStart);
-
-    this.store.dispatch(
-      DataWorkEntriesActions.setEntry({
-        week: week,
-        dayOfWeek: this.weekDay,
-        entry: { timeRange: { startHours: 8, endHours: 17 }, pauses: [] },
-      })
-    );
-  }
-
-  updateWorkDayEntry() {
-    if (!this.workDayStart || !this.workDayEnd) {
-      return;
+    if (workEntry !== null) {
+      return WorkEntryHelper.getWorkHours(workEntry);
     }
 
-    let week = WeekIdentifierHelper.fromDate(this.weekStart);
-    let entry = { ...this.workEntry } as WorkDayEntry;
-    entry.timeRange = TimeRangeHelper.fromTime(this.workDayStart, this.workDayEnd);
+    return 0;
+  });
 
-    this.store.dispatch(
-      DataWorkEntriesActions.setEntry({
-        week: week,
-        dayOfWeek: this.weekDay,
-        entry,
-      })
-    );
-  }
+  readonly isDayToday = computed(() => DateHelpers.isToday(this.date()));
+  readonly isDayInFuture = computed(() => DateHelpers.isInFuture(this.date()));
 
-  addHolidayEntry() {
-    this.store.dispatch(
-      DataWorkEntriesActions.setEntry({ week: this.week, dayOfWeek: this.weekDay, entry: {} as HolidayEntry })
-    );
-  }
+  readonly dayWorkHoursDiff = computed(() => {
+    return TimeRangeHelper.getHoursDiff({ startHours: this.hoursPerDay() || 0, endHours: this.workHours() });
+  });
 
-  removeWorkEntry() {
-    this.store.dispatch(DataWorkEntriesActions.removeEntry({ week: this.week, dayOfWeek: this.weekDay }));
-  }
+  readonly isDayWorkHoursReached = computed(() => {
+    return this.dayWorkHoursDiff() >= 0;
+  });
 
-  get dayProgressIndicatorOffset() {
+  readonly dayProgressWorkedHours = signal(0);
+
+  readonly dayProgressIndicatorOffset = computed(() => {
     // fixed rem values to calculate exact offset of indicator
     const lineHeight = 1.75;
     const prePauseGap = 2;
@@ -211,31 +147,37 @@ export class WeekDayCardComponent implements OnInit, OnChanges {
     const pauseGap = 1.5;
     const afterPauseGap = 2 + 1.5 + 1.5;
 
-    const getOffset = (rem: number) => `${rem}rem`;
+    const startOffset = lineHeight / 2;
 
-    if (!this.workEntry || !isWorkDayEntry(this.workEntry)) {
-      return getOffset(lineHeight / 2);
+    const getOffset = (rem: number) => `${Math.max(rem, startOffset)}rem`;
+
+    const workEntry = this.workEntry();
+
+    if (!workEntry || !isWorkDayEntry(workEntry)) {
+      return getOffset(startOffset);
     }
 
-    if (!this.isDayToday || this.workDayStart === null || this.workDayEnd === null) {
-      return getOffset(lineHeight / 2);
+    const workDayStart = this.workDayStart();
+    const workDayEnd = this.workDayEnd();
+
+    if (!this.isDayToday() || workDayStart === null || workDayEnd === null) {
+      return getOffset(startOffset);
     }
 
-    const now = new Date();
-    const workedHours = now.getHours() + now.getMinutes() / 60;
+    const workedHours = this.dayProgressWorkedHours();
 
-    const pauses = this.workEntry.pauses;
+    const pauses = workEntry.pauses;
 
-    let rangeStart = this.workDayStart;
-    let rangeStartOffset = lineHeight / 2;
-    let rangeEnd = this.workDayEnd;
+    let rangeStart = workDayStart;
+    let rangeStartOffset = startOffset;
+    let rangeEnd = workDayEnd;
     let rangeEndOffset =
       lineHeight +
       prePauseGap +
       pauses.length * (2 * lineHeight + innerPauseHeight) +
       (pauses.length - 1) * pauseGap +
       afterPauseGap +
-      lineHeight / 2;
+      startOffset;
 
     if (pauses.length > 0) {
       rangeStartOffset += lineHeight + prePauseGap;
@@ -253,7 +195,7 @@ export class WeekDayCardComponent implements OnInit, OnChanges {
         if (i > 0) {
           rangeStartOffset -= pauseGap + lineHeight;
         } else {
-          rangeStartOffset = lineHeight / 2;
+          rangeStartOffset = startOffset;
         }
         rangeEndOffset = rangeStartOffset + pauseGap + lineHeight;
 
@@ -286,5 +228,96 @@ export class WeekDayCardComponent implements OnInit, OnChanges {
     const progress = Math.min(1, workedTime / totalTime);
 
     return getOffset(rangeStartOffset + (rangeEndOffset - rangeStartOffset) * progress);
+  });
+
+  constructor() {
+    effect(() => {
+      const workEntry = this.workEntry();
+
+      if (workEntry && isWorkDayEntry(workEntry)) {
+        this.workDayStart.set(TimeRangeHelper.getTimeString(workEntry.timeRange.startHours));
+        this.workDayEnd.set(TimeRangeHelper.getTimeString(workEntry.timeRange.endHours));
+      } else {
+        this.workDayStart.set(null);
+        this.workDayEnd.set(null);
+      }
+    });
+
+    effect(() => {
+      const workDayStart = this.workDayStart();
+      const workDayEnd = this.workDayEnd();
+
+      untracked(() => {
+        this.updateWorkDayEntry(workDayStart, workDayEnd);
+      });
+    });
+  }
+
+  ngOnInit() {
+    // TODO: improve by only registering this for the current day
+    merge(fromEvent(window, 'focus'), fromEvent(window, 'blur'))
+      .pipe(
+        map((event) => event.type),
+        startWith(document.hasFocus() ? 'focus' : 'blur'),
+        switchMap((type) => {
+          if (type === 'focus') {
+            const now = new Date();
+
+            return timer((60 - now.getSeconds()) * 1000).pipe(
+              switchMap(() => interval(60 * 1000).pipe(startWith(null))),
+              startWith(null)
+            );
+          }
+
+          return of();
+        }),
+        map(() => {
+          const now = new Date();
+          return now.getHours() + now.getMinutes() / 60;
+        }),
+        tap((workedHours) => this.dayProgressWorkedHours.set(workedHours)),
+        takeUntilDestroyed(this.destroyRef)
+      )
+      .subscribe();
+  }
+
+  addWorkDayEntry() {
+    let week = WeekIdentifierHelper.fromDate(this.weekStart());
+
+    this.store.dispatch(
+      DataWorkEntriesActions.setEntry({
+        week: week,
+        dayOfWeek: this.weekDay(),
+        entry: { timeRange: { startHours: 8, endHours: 17 }, pauses: [] },
+      })
+    );
+  }
+
+  protected updateWorkDayEntry(workDayStart: string | null, workDayEnd: string | null) {
+    if (workDayStart === null || workDayEnd === null) {
+      return;
+    }
+
+    let week = WeekIdentifierHelper.fromDate(this.weekStart());
+    let entry = { ...this.workEntry() } as WorkDayEntry;
+    entry.timeRange = TimeRangeHelper.fromTime(workDayStart, workDayEnd);
+
+    this.store.dispatch(
+      DataWorkEntriesActions.setEntry({
+        week: week,
+        dayOfWeek: this.weekDay(),
+        entry,
+      })
+    );
+  }
+
+  addHolidayEntry() {
+    this.store.dispatch(
+      DataWorkEntriesActions.setEntry({ week: this.week(), dayOfWeek: this.weekDay(), entry: {} as HolidayEntry })
+    );
+  }
+
+  removeWorkEntry() {
+    this.store.dispatch(DataWorkEntriesActions.removeEntry({ week: this.week(), dayOfWeek: this.weekDay() }));
   }
 }

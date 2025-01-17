@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Actions } from '@ngrx/effects';
 import { createEffect } from '@ngrx/effects';
 import { ofType } from '@ngrx/effects';
@@ -10,7 +10,9 @@ import { DataStateStorageKey, InitialDataState } from './data.state';
 
 @Injectable()
 export class DataEffects {
-  constructor(private actions$: Actions, private store: Store) {}
+  private actions$ = inject(Actions);
+  private store = inject(Store);
+
 
   loadData$ = createEffect(() =>
     this.actions$.pipe(

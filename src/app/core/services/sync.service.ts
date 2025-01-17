@@ -1,5 +1,5 @@
 import { HttpClient, HttpErrorResponse, HttpRequest, HttpResponse } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import {
   BehaviorSubject,
@@ -22,6 +22,9 @@ import { selectSyncData, selectSyncInfo } from '../state/data/data.selectors';
   providedIn: 'root',
 })
 export class SyncService {
+  private store = inject(Store);
+  private http = inject(HttpClient);
+
   private syncSettings$ = this.store.select(selectSyncInfo).pipe(map((s) => s?.settings));
   private syncHistory$ = this.store.select(selectSyncInfo).pipe(map((s) => s?.history));
 
@@ -29,8 +32,6 @@ export class SyncService {
 
   private _isSyncing$ = new BehaviorSubject(false);
   isSyncing$ = this._isSyncing$.asObservable();
-
-  constructor(private store: Store, private http: HttpClient) {}
 
   get isSupported() {
     return !!window.crypto?.subtle;

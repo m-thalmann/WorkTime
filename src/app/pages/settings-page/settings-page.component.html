@@ -1,167 +1,138 @@
-<div
-    class="container"
-    *ngIf="{
-        hoursPerDay: hoursPerDay$ | async,
-        workStartDate: workStartDate$ | async,
-        workStartHours: workStartHours$ | async,
-        syncSettingsSavedIndicator: syncSettingsSavedIndicator$ | async,
-        isSyncing: sync.isSyncing$ | async
-    } as vm"
->
+<div class="container">
     <h2>
         <i class="fa-solid fa-gear"></i>
         Settings
     </h2>
-
     <app-card class="general-settings">
         <h3><i class="fa-solid fa-wrench"></i> General</h3>
-
         <label>
             Work hours per day
             <input
                 appInput
                 type="time"
-                [value]="vm.hoursPerDay | hours"
+                [value]="hoursPerDay() | hours"
                 (change)="setHoursPerDay(hoursPerDayInput.value)"
                 #hoursPerDayInput
             />
         </label>
-
         <label>
             Work start date
             <input
                 appInput
                 type="date"
-                [value]="vm.workStartDate"
+                [value]="workStartDate()"
                 (change)="setWorkStartDate(workStartDateInput.value)"
                 #workStartDateInput
             />
         </label>
-
         <label>
             Hours before start
             <input
                 appInput
                 type="time"
-                [value]="vm.workStartHours | hours"
+                [value]="workStartHours() | hours"
                 (change)="setWorkStartHours(workStartHoursInput.value)"
                 #workStartHoursInput
             />
         </label>
-
         <button appButton (click)="resetData()" class="reset-button" data-color="warn">
             <i class="fa-solid fa-user-xmark"></i>
             Reset data
         </button>
     </app-card>
-
     <app-card class="sync-settings">
         <h3><i class="fa-solid fa-cloud"></i> Synchronization</h3>
-
-        <form [formGroup]="syncSettingsForm" (submit)="updateSyncSettings()" *ngIf="sync.isSupported">
+        @if (sync.isSupported) {
+        <form [formGroup]="syncSettingsForm" (submit)="updateSyncSettings()">
             <label>
                 <span>Sync enabled</span>
                 <input type="checkbox" formControlName="enabled" />
             </label>
-
-            <ng-container *ngIf="syncSettingsForm.get('enabled')?.value">
+            @if (syncSettingsForm.get('enabled')?.value) {
+            <label>
+                <span>URL</span>
+                <input
+                    type="url"
+                    formControlName="url"
+                    placeholder="https://example.com/webdav/worktime.json"
+                    appInput
+                />
+            </label>
+            <label>
+                <span>Update method</span>
+                <select formControlName="updateMethod" appInput>
+                    <option value="POST">POST</option>
+                    <option value="PATCH">PATCH</option>
+                    <option value="PUT">PUT</option>
+                </select>
+            </label>
+            <label>
+                <span>Authentication type</span>
+                <select formControlName="authenticationType" appInput>
+                    <option [value]="null">None</option>
+                    <option value="basic">Basic</option>
+                    <option value="token">Token</option>
+                </select>
+            </label>
+            @if (syncSettingsForm.get('authenticationType')?.value === 'token') {
+            <div formGroupName="tokenAuthentication" class="sync-token-settings">
                 <label>
-                    <span>URL</span>
+                    <span>Token</span>
                     <input
-                        type="url"
-                        formControlName="url"
-                        placeholder="https://example.com/webdav/worktime.json"
+                        type="text"
+                        formControlName="token"
+                        placeholder="erkui23rvwlb2vs3213rh2hg6eq2s21sb5"
                         appInput
                     />
                 </label>
-
                 <label>
-                    <span>Update method</span>
-                    <select formControlName="updateMethod" appInput>
-                        <option value="POST">POST</option>
-                        <option value="PATCH">PATCH</option>
-                        <option value="PUT">PUT</option>
+                    <span>Token location</span>
+                    <select formControlName="location" appInput>
+                        <option value="header">Header</option>
+                        <option value="query">Query</option>
                     </select>
                 </label>
-
+                @if (syncSettingsForm.get('tokenAuthentication.location')?.value === 'query') {
                 <label>
-                    <span>Authentication type</span>
-                    <select formControlName="authenticationType" appInput>
-                        <option [value]="null">None</option>
-                        <option value="basic">Basic</option>
-                        <option value="token">Token</option>
-                    </select>
+                    <span>Query parameter name</span>
+                    <input type="text" formControlName="queryParam" placeholder="token" appInput />
                 </label>
-
-                <div
-                    formGroupName="tokenAuthentication"
-                    class="sync-token-settings"
-                    *ngIf="syncSettingsForm.get('authenticationType')?.value === 'token'"
-                >
-                    <label>
-                        <span>Token</span>
-                        <input
-                            type="text"
-                            formControlName="token"
-                            placeholder="erkui23rvwlb2vs3213rh2hg6eq2s21sb5"
-                            appInput
-                        />
-                    </label>
-
-                    <label>
-                        <span>Token location</span>
-                        <select formControlName="location" appInput>
-                            <option value="header">Header</option>
-                            <option value="query">Query</option>
-                        </select>
-                    </label>
-
-                    <label *ngIf="syncSettingsForm.get('tokenAuthentication.location')?.value === 'query'">
-                        <span>Query parameter name</span>
-                        <input type="text" formControlName="queryParam" placeholder="token" appInput />
-                    </label>
-                </div>
-
-                <div
-                    formGroupName="basicAuthentication"
-                    class="sync-basic-settings"
-                    *ngIf="syncSettingsForm.get('authenticationType')?.value === 'basic'"
-                >
-                    <label>
-                        <span>Username</span>
-                        <input type="text" formControlName="username" placeholder="john.doe" appInput />
-                    </label>
-
-                    <label>
-                        <span>Password</span>
-                        <input type="password" formControlName="password" placeholder="password" appInput />
-                    </label>
-                </div>
-            </ng-container>
-
+                }
+            </div>
+            } @if (syncSettingsForm.get('authenticationType')?.value === 'basic') {
+            <div formGroupName="basicAuthentication" class="sync-basic-settings">
+                <label>
+                    <span>Username</span>
+                    <input type="text" formControlName="username" placeholder="john.doe" appInput />
+                </label>
+                <label>
+                    <span>Password</span>
+                    <input type="password" formControlName="password" placeholder="password" appInput />
+                </label>
+            </div>
+            } }
             <input
                 type="submit"
-                [value]="vm.syncSettingsSavedIndicator ? '✔' : 'Save settings'"
+                [value]="syncSettingsSavedIndicator() ? '✔' : 'Save settings'"
                 appButton
-                [disabled]="!syncSettingsForm.valid || vm.isSyncing"
+                [disabled]="!syncSettingsForm.valid || isSyncing()"
             />
         </form>
-
+        }
         <div class="force-sync-buttons">
-            <button appButton (click)="pullSync()" [disabled]="vm.isSyncing">
+            <button appButton (click)="pullSync()" [disabled]="isSyncing()">
                 <i class="fa-solid fa-download"></i> Force pull
             </button>
-            <button appButton (click)="pushSync()" [disabled]="vm.isSyncing">
+            <button appButton (click)="pushSync()" [disabled]="isSyncing()">
                 <i class="fa-solid fa-upload"></i> Force push
             </button>
         </div>
-
-        <p class="fg-warn" *ngIf="!sync.isSupported">Syncing is not supported in your browser!</p>
+        @if (!sync.isSupported) {
+        <p class="fg-warn">Syncing is not supported in your browser!</p>
+        }
     </app-card>
-
     <app-card class="import-export-settings">
         <h3><i class="fa-solid fa-rotate"></i> Import/Export</h3>
-
         <button appButton (click)="importExport.exportData()"><i class="fa-solid fa-download"></i> Export data</button>
         <button appButton (click)="importExport.importData()"><i class="fa-solid fa-upload"></i> Import data</button>
     </app-card>

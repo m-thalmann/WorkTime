@@ -3,7 +3,6 @@ import { TimeRangeHelper } from '../models/time-range.model';
 
 @Pipe({
   name: 'hours',
-  standalone: true,
   pure: true,
 })
 export class HoursPipe implements PipeTransform {

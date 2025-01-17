@@ -1,93 +1,69 @@
-<ng-container *ngIf="{ hoursPerDay: hoursPerDay$ | async } as vm">
-    <app-card class="day" [class.today]="isDayToday" [class.future]="isDayInFuture">
-        <p class="day-title">
-            <i class="fa-solid fa-location-dot fg-accent" *ngIf="isDayToday"></i>
-            {{ dayDateString }}
-        </p>
-        <div class="day-content">
-            <ng-container *ngIf="workEntry; else noEntry">
-                <ng-container *ngIf="workDay; else holiday">
-                    <div class="day-summary">
-                        <div class="total-day-work-time">
-                            <i class="fa-solid fa-clock"></i>
-                            {{ workHours | hours }}
-                        </div>
-
-                        <ng-container *ngIf="{ data: getDiffHours(vm.hoursPerDay) } as dayDiff">
-                            <div class="day-work-time-diff" [class.reached]="isReached(dayDiff.data)">
-                                <i class="fa-solid fa-hourglass"></i>
-                                {{ dayDiff.data | hours : true }}
-                            </div>
-                        </ng-container>
-                    </div>
-
-                    <div class="times">
-                        <span
-                            class="day-progress"
-                            [ngStyle]="{ top: dayProgressIndicatorOffset }"
-                            *ngIf="isDayToday"
-                        ></span>
-
-                        <app-week-day-card-time-input-wrapper>
-                            <input
-                                appInput
-                                type="time"
-                                [(ngModel)]="workDayStart"
-                                (blur)="updateWorkDayEntry()"
-                                class="start-input"
-                            />
-                        </app-week-day-card-time-input-wrapper>
-
-                        <app-week-day-card-pauses
-                            [weekDayIdentifier]="weekDayIdentifier"
-                            [pauses]="workDay.pauses"
-                        ></app-week-day-card-pauses>
-
-                        <app-week-day-card-time-input-wrapper>
-                            <input
-                                appInput
-                                type="time"
-                                [(ngModel)]="workDayEnd"
-                                (blur)="updateWorkDayEntry()"
-                                class="end-input"
-                            />
-                        </app-week-day-card-time-input-wrapper>
-                    </div>
-                </ng-container>
-
-                <ng-template #holiday>
-                    <p class="holiday">
-                        <i class="fa-solid fa-calendar-minus"></i>
-                        <span>Holiday /<br />No work</span>
-                    </p>
-                </ng-template>
-
-                <div class="buttons">
-                    <button appButton (click)="removeWorkEntry()">
-                        <i class="fa-solid fa-calendar-xmark"></i>
-                        Clear entry
-                    </button>
-                </div>
-            </ng-container>
-
-            <ng-template #noEntry>
-                <div class="no-entry">
-                    <ng-container *ngIf="!isDayInFuture; else futureEntry">
-                        <button appButton (click)="addWorkDayEntry()" data-color="primary">
-                            <i class="fa-solid fa-calendar-plus"></i> Add entry
-                        </button>
-                        <button appButton (click)="addHolidayEntry()">
-                            <i class="fa-solid fa-calendar-minus"></i> Add holiday entry
-                        </button>
-                    </ng-container>
-
-                    <ng-template #futureEntry>
-                        <i class="fa-solid fa-wand-magic-sparkles fg-accent"></i>
-                        <span>This date is in the future...</span>
-                    </ng-template>
-                </div>
-            </ng-template>
+<app-card class="day" [class.today]="isDayToday()" [class.future]="isDayInFuture()">
+    <p class="day-title">
+        @if (isDayToday()) {
+        <i class="fa-solid fa-location-dot fg-accent"></i>
+        }
+        {{ dayDateString() }}
+    </p>
+    <div class="day-content">
+        @if (workEntry()) { @if (workDay(); as _workDay) {
+        <div class="day-summary">
+            <div class="total-day-work-time">
+                <i class="fa-solid fa-clock"></i>
+                {{ workHours() | hours }}
+            </div>
+            <div class="day-work-time-diff" [class.reached]="isDayWorkHoursReached()">
+                <i class="fa-solid fa-hourglass"></i>
+                {{ dayWorkHoursDiff() | hours : true }}
+            </div>
         </div>
-    </app-card>
-</ng-container>
-
+        <div class="times">
+            @if (isDayToday()) {
+            <span class="day-progress" [ngStyle]="{ top: dayProgressIndicatorOffset() }"></span>
+            }
+            <app-week-day-card-time-input-wrapper>
+                <input appInput type="time" [(ngModel)]="workDayStart" class="start-input" />
+            </app-week-day-card-time-input-wrapper>
+            <app-week-day-card-pauses
+                [weekDayIdentifier]="weekDayIdentifier()"
+                [pauses]="_workDay.pauses"
+            ></app-week-day-card-pauses>
+            <app-week-day-card-time-input-wrapper>
+                <input appInput type="time" [(ngModel)]="workDayEnd" class="end-input" />
+            </app-week-day-card-time-input-wrapper>
+        </div>
+        } @else {
+        <p class="holiday">
+            <i class="fa-solid fa-calendar-minus"></i>
+            <span>Holiday /<br />No work</span>
+        </p>
+        }
+        <ng-template #holiday>
+            <p class="holiday">
+                <i class="fa-solid fa-calendar-minus"></i>
+                <span>Holiday /<br />No work</span>
+            </p>
+        </ng-template>
+        <div class="buttons">
+            <button appButton (click)="removeWorkEntry()">
+                <i class="fa-solid fa-calendar-xmark"></i>
+                Clear entry
+            </button>
+        </div>
+        } @else {
+        <div class="no-entry">
+            @if (!isDayInFuture()) {
+            <button appButton (click)="addWorkDayEntry()" data-color="primary">
+                <i class="fa-solid fa-calendar-plus"></i> Add entry
+            </button>
+            <button appButton (click)="addHolidayEntry()">
+                <i class="fa-solid fa-calendar-minus"></i> Add holiday entry
+            </button>
+            } @else {
+            <i class="fa-solid fa-wand-magic-sparkles fg-accent"></i>
+            <span>This date is in the future...</span>
+            }
+        </div>
+        }
+    </div>
+</app-card>

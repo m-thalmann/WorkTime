@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { fromEvent, lastValueFrom, take } from 'rxjs';
 import { DataActions } from '../state/data/data.actions';
@@ -8,7 +8,7 @@ import { selectData } from '../state/data/data.selectors';
   providedIn: 'root',
 })
 export class ImportExportService {
-  constructor(private store: Store) {}
+  private store = inject(Store);
 
   async exportData() {
     const { workWeeks, hoursPerDay, workStartDate, workStartHours } = await lastValueFrom(

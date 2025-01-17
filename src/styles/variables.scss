@@ -1,3 +1,5 @@
+@use 'sass:color';
+
 $background: #2f2f2f;
 $foreground: white;
 
@@ -14,4 +16,4 @@ $main-padding: 1em;
 
 $mobile-breakpoint: 510px;
 
-$card-background: darken($foreground, 75%);
+$card-background: color.scale($foreground, $lightness: -75%);

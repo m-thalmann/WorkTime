@@ -1,20 +1,20 @@
 <div class="container">
+    @for (pause of pauses(); track pause; let index = $index) {
     <app-week-day-card-pause
-        [weekDayIdentifier]="weekDayIdentifier"
+        [weekDayIdentifier]="weekDayIdentifier()"
         [pause]="pause"
         [pauseIndex]="index"
-        *ngFor="let pause of pauses; let index = index"
     ></app-week-day-card-pause>
-
+    } @if (isAddingPause()) {
     <app-week-day-card-pause
-        [weekDayIdentifier]="weekDayIdentifier"
+        [weekDayIdentifier]="weekDayIdentifier()"
         [pause]="null"
         [pauseIndex]="null"
-        (finishAddPause)="isAddingPause = false"
-        *ngIf="isAddingPause"
+        (finishAddPause)="isAddingPause.set(false)"
     ></app-week-day-card-pause>
+    }
 
-    <button appButton (click)="isAddingPause = true" [disabled]="isAddingPause" data-color="primary">
+    <button appButton (click)="isAddingPause.set(true)" [disabled]="isAddingPause()" data-color="primary">
         <i class="fa-solid fa-plus"></i> Pause
     </button>
 </div>

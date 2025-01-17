@@ -23,6 +23,10 @@ jobs:
       - name: Set env
         run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
       - name: Generate changelog
         run: |
           npm i -g conventional-changelog-cli@^3.0.0
@@ -32,11 +36,11 @@ jobs:
 
       - name: Build
         run: |
-          npm i
+          npm ci
           npm run build
           cd dist
           zip -r ../release.zip work-time
-          sed -i 's/<base href="\/">/<base href="\/WorkTime\/">/g' work-time/index.html # set base href for gh-pages
+          sed -i 's/<base href="\/">/<base href="\/WorkTime\/">/g' work-time/browser/index.html # set base href for gh-pages
 
       - name: Release
         uses: actions/create-release@v1
@@ -64,7 +68,7 @@ jobs:
       - name: Upload pages artifact
         uses: actions/upload-pages-artifact@v1
         with:
-          path: 'dist/work-time'
+          path: 'dist/work-time/browser'
 
   deploy:
     environment:
