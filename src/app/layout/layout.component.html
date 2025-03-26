@@ -1,11 +1,19 @@
 <header>
     <div class="header-content">
-        <a appButton routerLink="/settings" routerLinkActive="hidden" class="nav-button">
-            <i class="fa-solid fa-gear"></i>
-        </a>
-        <a appButton routerLink="/dashboard" routerLinkActive="hidden" class="nav-button">
-            <i class="fa-solid fa-home"></i>
-        </a>
+        <div class="left-actions">
+            <a appButton routerLink="/settings" routerLinkActive="hidden" class="nav-button">
+                <i class="fa-solid fa-gear"></i>
+            </a>
+            <a
+                appButton
+                routerLink="/"
+                routerLinkActive="hidden"
+                [routerLinkActiveOptions]="{ exact: true }"
+                class="nav-button"
+            >
+                <i class="fa-solid fa-home"></i>
+            </a>
+        </div>
         <div class="title">
             <img src="assets/images/icon.png" />
             <h1>WorkTime</h1>
@@ -29,3 +37,7 @@
 <main>
     <router-outlet></router-outlet>
 </main>
+
+<a href="https://github.com/m-thalmann/WorkTime" target="_blank" rel="noopener noreferrer" class="github-link">
+    <i class="fa-brands fa-github"></i>
+</a>

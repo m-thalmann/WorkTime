@@ -8,7 +8,8 @@ export const AppRoutes: Route[] = [
     component: LayoutComponent,
     children: [
       {
-        path: 'dashboard',
+        path: '',
+        pathMatch: 'full',
         component: DashboardPageComponent,
       },
 
@@ -18,7 +19,7 @@ export const AppRoutes: Route[] = [
           import('./pages/settings-page/settings-page.component').then((m) => m.SettingsPageComponent),
       },
 
-      { path: '**', redirectTo: '/dashboard' },
+      { path: '**', redirectTo: '/' },
     ],
   },
 ];
