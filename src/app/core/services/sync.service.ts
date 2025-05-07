@@ -59,7 +59,7 @@ export class SyncService {
     if (!body) {
       request = new HttpRequest('GET', settings.url);
     } else {
-      request = new HttpRequest(settings.updateMethod, settings.url, body);
+      request = new HttpRequest(settings.updateMethod, settings.url, body, { responseType: 'text' });
     }
 
     if (settings.authentication) {
